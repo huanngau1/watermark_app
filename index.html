@@ -176,7 +176,7 @@
     }
 
     #lastShot {
-      margin-top: 6px;
+      margin-top: 10px;
       font-size: 11px;
       color: #aaa;
     }
@@ -186,6 +186,10 @@
       border-radius: 6px;
       margin-top: 4px;
       background: #000;
+    }
+
+    #downloadBtn {
+      margin-top: 6px;
     }
 
     video#videoSource {
@@ -249,13 +253,16 @@
       </div>
 
       <div class="actions">
-        <button id="captureBtn">Chụp & tải ảnh</button>
+        <button id="captureBtn">Chụp</button>
         <button id="backBtn" class="secondary">Quay lại</button>
       </div>
 
       <div id="cameraStatus" class="status"></div>
 
-      <div id="lastShot"></div>
+      <div id="lastShot">
+        <!-- ảnh kết quả + nút tải sẽ nằm ở đây -->
+      </div>
+      <button id="downloadBtn" disabled>Tải ảnh</button>
     </section>
 
     <!-- video nguồn (ẩn) -->
@@ -286,6 +293,7 @@
 
     const videoSource = document.getElementById("videoSource");
     const lastShotContainer = document.getElementById("lastShot");
+    const downloadBtn = document.getElementById("downloadBtn");
 
     // ===== state =====
     let currentLayout = null;
@@ -293,189 +301,190 @@
     let mediaStream = null;
     let previewLoopId = null;
     let currentUserData = null;
+    let lastShotDataUrl = null;
 
     const CANVAS_W = 960;
     const CANVAS_H = 1280;
 
-    // ===== default layout 960x1280 (copy JSON bạn đưa, thêm rect nền tên) =====
+    // ===== default layout 960x1280: CHÍNH LÀ JSON BẠN GỬI =====
     const defaultLayout = {
-      imageWidth: 960,
-      imageHeight: 1280,
-      items: [
+      "imageWidth": 960,
+      "imageHeight": 1280,
+      "items": [
         {
-          id: "time",
-          type: "text",
-          left: -6,
-          top: 967,
-          width: 212,
-          height: 128,
-          leftPercent: -0.0063,
-          topPercent: 0.7555,
-          text: "19:35",
-          fontFamily: "\"Big Shoulders Display\", sans-serif",
-          fontSize: 100,
-          fontWeight: "700",
-          color: "#ffffff",
-          strokeWidth: 1,
-          strokeColor: "#000000",
-          strokeOpacity: 0.05
+          "id": "text-1",
+          "type": "text",
+          "left": 20,
+          "top": 967,
+          "width": 179,
+          "height": 120,
+          "leftPercent": 0.0205,
+          "topPercent": 0.7558,
+          "text": "19:35",
+          "fontFamily": "\"Big Shoulders Display\", sans-serif",
+          "fontSize": 100,
+          "fontWeight": "500",
+          "color": "#ffffff",
+          "strokeWidth": 1,
+          "strokeColor": "#000000",
+          "strokeOpacity": 1
         },
         {
-          id: "line-1",
-          type: "line",
-          left: 148,
-          top: 1016,
-          width: 119,
-          height: 26,
-          leftPercent: 0.1542,
-          topPercent: 0.7937,
-          lineLength: 85,
-          lineThickness: 4,
-          lineColor: "#e0b642",
-          lineAngle: 90
+          "id": "line-1",
+          "type": "line",
+          "left": 213,
+          "top": 984,
+          "width": 3,
+          "height": 82,
+          "leftPercent": 0.2215,
+          "topPercent": 0.7686,
+          "lineLength": 81,
+          "lineThickness": 3,
+          "lineColor": "#e0b642",
+          "lineAngle": 90
         },
         {
-          id: "date",
-          type: "text",
-          left: 209,
-          top: 976,
-          width: 260,
-          height: 46,
-          leftPercent: 0.2176,
-          topPercent: 0.7625,
-          text: "17 Tháng 11, 2025",
-          fontFamily: "\"Roboto Condensed\", sans-serif",
-          fontSize: 31,
-          fontWeight: "400",
-          color: "#ffffff",
-          strokeWidth: 1,
-          strokeColor: "#585555",
-          strokeOpacity: 0.65
+          "id": "text-2",
+          "type": "text",
+          "left": 236,
+          "top": 977,
+          "width": 226,
+          "height": 38,
+          "leftPercent": 0.2453,
+          "topPercent": 0.7636,
+          "text": "17 Tháng 11, 2025",
+          "fontFamily": "\"Roboto Condensed\", sans-serif",
+          "fontSize": 31,
+          "fontWeight": "400",
+          "color": "#ffffff",
+          "strokeWidth": 1,
+          "strokeColor": "#000000",
+          "strokeOpacity": 0.25
         },
         {
-          id: "address",
-          type: "text",
-          left: -3,
-          top: 1088,
-          width: 634,
-          height: 84,
-          leftPercent: -0.0031,
-          topPercent: 0.85,
-          text: "19 Bùi Quốc Khái, P. Long Thạnh Mỹ, TP. Thủ Đức,Thành Phố Hồ Chí Minh",
-          fontFamily: "\"Roboto Condensed\", sans-serif",
-          fontSize: 31,
-          fontWeight: "400",
-          color: "#ffffff",
-          strokeWidth: 1,
-          strokeColor: "#555555",
-          strokeOpacity: 0.25
+          "id": "text-3",
+          "type": "text",
+          "left": 21,
+          "top": 1089,
+          "width": 606,
+          "height": 75,
+          "leftPercent": 0.0215,
+          "topPercent": 0.8511,
+          "text": "19 Bùi Quốc Khái, P. Long Thạnh Mỹ, TP. Thủ Đức, Thành Phố Hồ Chí Minh",
+          "fontFamily": "\"Roboto Condensed\", sans-serif",
+          "fontSize": 31,
+          "fontWeight": "400",
+          "color": "#ffffff",
+          "strokeWidth": 1,
+          "strokeColor": "#424242",
+          "strokeOpacity": 0.5
         },
         {
-          id: "weekday",
-          type: "text",
-          left: 211,
-          top: 1035,
-          width: 130,
-          height: 46,
-          leftPercent: 0.2198,
-          topPercent: 0.8086,
-          text: "Thứ Hai",
-          fontFamily: "\"Roboto Condensed\", sans-serif",
-          fontSize: 31,
-          fontWeight: "400",
-          color: "#ffffff",
-          strokeWidth: 1,
-          strokeColor: "#555555",
-          strokeOpacity: 0.25
+          "id": "text-4",
+          "type": "text",
+          "left": 236,
+          "top": 1036,
+          "width": 97,
+          "height": 38,
+          "leftPercent": 0.2453,
+          "topPercent": 0.809,
+          "text": "Thứ Hai",
+          "fontFamily": "\"Roboto Condensed\", sans-serif",
+          "fontSize": 31,
+          "fontWeight": "400",
+          "color": "#ffffff",
+          "strokeWidth": 1,
+          "strokeColor": "#000000",
+          "strokeOpacity": 0.25
         },
         {
-          id: "name",
-          type: "text",
-          left: 14,
-          top: 1193,
-          width: 317,
-          height: 46,
-          leftPercent: 0.0146,
-          topPercent: 0.932,
-          text: "Họ tên: TRẦN GIA LINH",
-          fontFamily: "\"Roboto Condensed\", sans-serif",
-          fontSize: 31,
-          fontWeight: "400",
-          color: "#ffffff",
-          strokeWidth: 1,
-          strokeColor: "#555555",
-          strokeOpacity: 0.25
+          "id": "text-5",
+          "type": "text",
+          "left": 39,
+          "top": 1193,
+          "width": 284,
+          "height": 38,
+          "leftPercent": 0.041,
+          "topPercent": 0.9324,
+          "text": "Họ tên: TRẦN GIA LINH",
+          "fontFamily": "\"Roboto Condensed\", sans-serif",
+          "fontSize": 31,
+          "fontWeight": "400",
+          "color": "#ffffff",
+          "strokeWidth": 1,
+          "strokeColor": "#424242",
+          "strokeOpacity": 0.5
         },
         {
-          id: "logo-main-1",
-          type: "text",
-          left: 785,
-          top: 1202,
-          width: 101,
-          height: 48,
-          leftPercent: 0.8177,
-          topPercent: 0.9391,
-          text: "Time",
-          fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
-          fontSize: 30,
-          fontWeight: "500",
-          color: "#d3ac21",
-          strokeWidth: 1,
-          strokeColor: "#555555",
-          strokeOpacity: 0.25
+          "id": "text-6",
+          "type": "text",
+          "left": 811,
+          "top": 1204,
+          "width": 70,
+          "height": 41,
+          "leftPercent": 0.8453,
+          "topPercent": 0.941,
+          "text": "Time",
+          "fontFamily": "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "fontSize": 30,
+          "fontWeight": "500",
+          "color": "#f4ba36",
+          "strokeWidth": 1,
+          "strokeColor": "#000000",
+          "strokeOpacity": 0.25
         },
         {
-          id: "logo-sub",
-          type: "text",
-          left: 790,
-          top: 1239,
-          width: 162,
-          height: 34,
-          leftPercent: 0.8229,
-          topPercent: 0.968,
-          text: "100% Chân thực",
-          fontFamily: "\"Roboto Condensed\", sans-serif",
-          fontSize: 20,
-          fontWeight: "500",
-          color: "#ffffff",
-          strokeWidth: 1,
-          strokeColor: "#555555",
-          strokeOpacity: 0.25
+          "id": "text-7",
+          "type": "text",
+          "left": 817,
+          "top": 1243,
+          "width": 131,
+          "height": 24,
+          "leftPercent": 0.8507,
+          "topPercent": 0.9709,
+          "text": "100% Chân thực",
+          "fontFamily": "\"Roboto Condensed\", sans-serif",
+          "fontSize": 20,
+          "fontWeight": "500",
+          "color": "#ffffff",
+          "strokeWidth": 1,
+          "strokeColor": "#000000",
+          "strokeOpacity": 0.2
         },
         {
-          id: "logo-main-2",
-          type: "text",
-          left: 851,
-          top: 1202,
-          width: 103,
-          height: 48,
-          leftPercent: 0.8865,
-          topPercent: 0.9391,
-          text: "mark",
-          fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
-          fontSize: 30,
-          fontWeight: "500",
-          color: "#ffffff",
-          strokeWidth: 1,
-          strokeColor: "#555555",
-          strokeOpacity: 0.25
+          "id": "text-8",
+          "type": "text",
+          "left": 877,
+          "top": 1204,
+          "width": 70,
+          "height": 41,
+          "leftPercent": 0.914,
+          "topPercent": 0.941,
+          "text": "mark",
+          "fontFamily": "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "fontSize": 30,
+          "fontWeight": "500",
+          "color": "#ffffff",
+          "strokeWidth": 1,
+          "strokeColor": "#000000",
+          "strokeOpacity": 0.25
         },
         {
-          id: "name-rect",
-          type: "rect",
-          left: 10,
-          top: 1180,
-          width: 302,
-          height: 77,
-          leftPercent: 0.0104,
-          topPercent: 0.92,
-          rectWidth: 302,
-          rectHeight: 77,
-          rectFillColor: "#000000",
-          rectOpacity: 0.3,
-          rectRadius: 6,
-          rectGradient: "fade-ltr",
-          rectFade: true
+          "id": "rect-1",
+          "type": "rect",
+          "left": 27,
+          "top": 1176,
+          "width": 300,
+          "height": 75,
+          "leftPercent": 0.0278,
+          "topPercent": 0.9185,
+          "rectWidth": 300,
+          "rectHeight": 75,
+          "rectFillColor": "#ffffff",
+          "rectOpacity": 0.3,
+          "rectRadius": 5,
+          "rectGradient": "fade-ltr",
+          "rectFade": true
         }
       ]
     };
@@ -546,9 +555,10 @@
     }
 
     // ===== layout helpers =====
+    // ƯU TIÊN PX -> giống overlay-tool (dom toạ độ px)
     function computeCoord(px, percent, total, scale) {
-      if (typeof percent === "number") return percent * total;
       if (typeof px === "number") return px * scale;
+      if (typeof percent === "number") return percent * total;
       return 0;
     }
 
@@ -599,20 +609,19 @@
       return { timeItem, dateItem, weekdayItem, addressItem, nameItem };
     }
 
-    // ===== TEXT DRAWING: dùng baseline = top + ascent để khớp overlay-tool =====
-    function drawWrappedTextWithBaseline(ctx, text, x, topY, maxWidth, lineHeight, ascent, doStroke) {
+    // ===== TEXT DRAWING: dùng baseline "top" như DIV =====
+    function drawWrappedTextWithBaseline(ctx, text, x, topY, maxWidth, lineHeight, _ascent, doStroke) {
       const words = text.split(/\s+/);
       let line = "";
       let lineIndex = 0;
-      const baselineBase = topY + ascent;
 
       for (let i = 0; i < words.length; i++) {
         const testLine = line ? (line + " " + words[i]) : words[i];
         const w = ctx.measureText(testLine).width;
         if (w > maxWidth && line) {
-          const baselineY = baselineBase + lineIndex * lineHeight;
-          if (doStroke) ctx.strokeText(line, x, baselineY);
-          ctx.fillText(line, x, baselineY);
+          const y = topY + lineIndex * lineHeight;
+          if (doStroke) ctx.strokeText(line, x, y);
+          ctx.fillText(line, x, y);
           line = words[i];
           lineIndex++;
         } else {
@@ -621,9 +630,9 @@
       }
 
       if (line) {
-        const baselineY = baselineBase + lineIndex * lineHeight;
-        if (doStroke) ctx.strokeText(line, x, baselineY);
-        ctx.fillText(line, x, baselineY);
+        const y = topY + lineIndex * lineHeight;
+        if (doStroke) ctx.strokeText(line, x, y);
+        ctx.fillText(line, x, y);
       }
     }
 
@@ -636,14 +645,14 @@
       const fontFamily = item.fontFamily || "sans-serif";
 
       ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-      ctx.textBaseline = "alphabetic";
+      ctx.textBaseline = "top"; // QUAN TRỌNG: top giống overlay-tool
 
       const text = (overrideText != null ? overrideText : (item.text || "")).toString();
 
       const metrics = ctx.measureText(text || "A");
       const ascent = metrics.actualBoundingBoxAscent || fontSize * 0.8;
       const descent = metrics.actualBoundingBoxDescent || fontSize * 0.2;
-      const lineHeight = (ascent + descent) * 1.1; // gần giống line-height mặc định
+      const lineHeight = (ascent + descent) * 1.1;
 
       const maxWidth = (typeof item.width === "number" && item.width > 0)
         ? scaleValue(item.width, scaleX)
@@ -663,13 +672,13 @@
       if (maxWidth) {
         drawWrappedTextWithBaseline(ctx, text, x, topY, maxWidth, lineHeight, ascent, doStroke);
       } else {
-        const baselineY = topY + ascent;
-        if (doStroke) ctx.strokeText(text, x, baselineY);
-        ctx.fillText(text, x, baselineY);
+        const y = topY;
+        if (doStroke) ctx.strokeText(text, x, y);
+        ctx.fillText(text, x, y);
       }
     }
 
-    // ===== LINE: dùng left/top/width/height là bounding box sau rotate =====
+    // ===== LINE =====
     function drawLineItem(ctx, item, canvasW, canvasH, scaleX, scaleY) {
       const rectX = computeCoord(item.left, item.leftPercent, canvasW, scaleX);
       const rectY = computeCoord(item.top, item.topPercent, canvasH, scaleY);
@@ -687,7 +696,6 @@
       const angleDeg = item.lineAngle || 0;
       const angleRad = angleDeg * Math.PI / 180;
 
-      // center của bounding box (y chang overlay-tool)
       const cx = rectX + rectW / 2;
       const cy = rectY + rectH / 2;
 
@@ -928,32 +936,35 @@
       goStepConfig();
     });
 
+    // CHỤP – chỉ lưu lại dataURL & show preview bên dưới
     captureBtn.addEventListener("click", () => {
       if (!currentUserData) {
         alert("Chưa có dữ liệu watermark.");
         return;
       }
       const dataUrl = previewCanvas.toDataURL("image/jpeg", 0.95);
+      lastShotDataUrl = dataUrl;
 
-      // hiển thị preview nhỏ
       lastShotContainer.innerHTML =
-        `<div>Ảnh đã chụp (chạm & giữ để lưu nếu nút tải không chạy):</div>
+        `<div>Ảnh đã chụp:</div>
          <img src="${dataUrl}" alt="Last shot" />`;
 
-      // tải về / mở tab mới
+      downloadBtn.disabled = false;
+      cameraStatus.textContent = "Đã chụp xong. Bạn có thể bấm 'Tải ảnh'.";
+    });
+
+    // NÚT TẢI ẢNH – tải file JPG, không mở tab mới
+    downloadBtn.addEventListener("click", () => {
+      if (!lastShotDataUrl) {
+        alert("Chưa có ảnh nào để tải. Hãy chụp trước.");
+        return;
+      }
       const a = document.createElement("a");
-      a.href = dataUrl;
+      a.href = lastShotDataUrl;
       a.download = `chattime_${Date.now()}.jpg`;
-      a.target = "_blank";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-
-      try {
-        window.open(dataUrl, "_blank");
-      } catch (e) {
-        console.log("window.open fallback error:", e);
-      }
     });
 
     // init binding default
