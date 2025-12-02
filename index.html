@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <title>Chattime Capture</title>
@@ -10,13 +11,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700&family=Roboto:wght@100;300;400;500;700;900&family=Roboto+Condensed:wght@300;400;500;700&display=swap"
-    rel="stylesheet"
-  />
+    rel="stylesheet" />
 
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       height: 100%;
@@ -51,7 +54,7 @@
       background: #121212;
       border-radius: 12px;
       padding: 12px 12px 14px;
-      box-shadow: 0 0 0 1px #222, 0 10px 30px rgba(0,0,0,0.7);
+      box-shadow: 0 0 0 1px #222, 0 10px 30px rgba(0, 0, 0, 0.7);
     }
 
     .card h2 {
@@ -93,7 +96,7 @@
       gap: 8px;
     }
 
-    .row > div {
+    .row>div {
       flex: 1;
     }
 
@@ -134,7 +137,8 @@
       position: relative;
       width: 100%;
       max-width: 360px;
-      aspect-ratio: 3/4; /* gần 960x1280 */
+      aspect-ratio: 3/4;
+      /* gần 960x1280 */
       background: #000;
       border-radius: 8px;
       overflow: hidden;
@@ -197,6 +201,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="app">
     <h1>Chattime Capture</h1>
@@ -348,7 +353,7 @@
           "type": "text",
           "left": 236,
           "top": 977,
-          "width": 226,
+          "width": 300,
           "height": 38,
           "leftPercent": 0.2453,
           "topPercent": 0.7636,
@@ -402,11 +407,11 @@
           "type": "text",
           "left": 39,
           "top": 1193,
-          "width": 284,
+          "width": 400,
           "height": 38,
           "leftPercent": 0.041,
           "topPercent": 0.9324,
-          "text": "Họ tên: TRẦN GIA LINH",
+          "text": "Họ tên: TRẦN VĂN A",
           "fontFamily": "\"Roboto Condensed\", sans-serif",
           "fontSize": 31,
           "fontWeight": "400",
@@ -647,6 +652,10 @@
       ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
       ctx.textBaseline = "top"; // QUAN TRỌNG: top giống overlay-tool
 
+      // ✅ Thêm 2 dòng này để chữ lấy đúng màu từ JSON
+      const fillColor = item.color || "#ffffff";
+      ctx.fillStyle = fillColor;
+
       const text = (overrideText != null ? overrideText : (item.text || "")).toString();
 
       const metrics = ctx.measureText(text || "A");
@@ -795,13 +804,13 @@
             facingMode: { ideal: "environment" },
             width: { ideal: 1920 },
             height: { ideal: 2560 },
-            aspectRatio: { ideal: 3/4 }
+            aspectRatio: { ideal: 3 / 4 }
           },
           audio: false
         };
         mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
         videoSource.srcObject = mediaStream;
-        await videoSource.play().catch(() => {});
+        await videoSource.play().catch(() => { });
         cameraStatus.textContent = "Camera đã sẵn sàng. Đang chờ font...";
         await waitFontsReady();
         cameraStatus.textContent = "Camera + font sẵn sàng. Giữ máy dọc để chụp.";
@@ -971,4 +980,5 @@
     bindings = analyzeBindings(defaultLayout);
   </script>
 </body>
+
 </html>
