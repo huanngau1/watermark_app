@@ -297,7 +297,7 @@
     const CANVAS_W = 960;
     const CANVAS_H = 1280;
 
-    // ===== default layout 960x1280 (giống JSON bạn gửi) =====
+    // ===== default layout 960x1280 (copy JSON bạn đưa, thêm rect nền tên) =====
     const defaultLayout = {
       imageWidth: 960,
       imageHeight: 1280,
@@ -519,8 +519,8 @@
 
     // ===== color helper =====
     function hexToRgba(input, alpha) {
-      let color = (input || "").trim();
-      if (!color) return input || "";
+      if (!input) return input;
+      let color = input.trim();
       const rgbaMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/i);
       if (rgbaMatch) {
         const r = parseInt(rgbaMatch[1], 10);
@@ -599,42 +599,51 @@
       return { timeItem, dateItem, weekdayItem, addressItem, nameItem };
     }
 
-    // ===== draw text (top-based, wrap theo width) =====
-    function drawWrappedText(ctx, text, x, yTop, maxWidth, lineHeight, doStroke) {
+    // ===== TEXT DRAWING: dùng baseline = top + ascent để khớp overlay-tool =====
+    function drawWrappedTextWithBaseline(ctx, text, x, topY, maxWidth, lineHeight, ascent, doStroke) {
       const words = text.split(/\s+/);
       let line = "";
-      let y = yTop;
+      let lineIndex = 0;
+      const baselineBase = topY + ascent;
+
       for (let i = 0; i < words.length; i++) {
         const testLine = line ? (line + " " + words[i]) : words[i];
         const w = ctx.measureText(testLine).width;
         if (w > maxWidth && line) {
-          if (doStroke) ctx.strokeText(line, x, y);
-          ctx.fillText(line, x, y);
-          y += lineHeight;
+          const baselineY = baselineBase + lineIndex * lineHeight;
+          if (doStroke) ctx.strokeText(line, x, baselineY);
+          ctx.fillText(line, x, baselineY);
           line = words[i];
+          lineIndex++;
         } else {
           line = testLine;
         }
       }
+
       if (line) {
-        if (doStroke) ctx.strokeText(line, x, y);
-        ctx.fillText(line, x, y);
+        const baselineY = baselineBase + lineIndex * lineHeight;
+        if (doStroke) ctx.strokeText(line, x, baselineY);
+        ctx.fillText(line, x, baselineY);
       }
     }
 
     function drawTextItem(ctx, item, canvasW, canvasH, scaleX, scaleY, overrideText) {
       const x = computeCoord(item.left, item.leftPercent, canvasW, scaleX);
-      const yTop = computeCoord(item.top, item.topPercent, canvasH, scaleY);
+      const topY = computeCoord(item.top, item.topPercent, canvasH, scaleY);
 
       const fontSize = scaleValue(item.fontSize || 20, scaleY);
       const fontWeight = item.fontWeight || "400";
       const fontFamily = item.fontFamily || "sans-serif";
 
       ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-      ctx.textBaseline = "top"; // bám top = yTop
-      ctx.fillStyle = item.color || "#ffffff";
+      ctx.textBaseline = "alphabetic";
 
       const text = (overrideText != null ? overrideText : (item.text || "")).toString();
+
+      const metrics = ctx.measureText(text || "A");
+      const ascent = metrics.actualBoundingBoxAscent || fontSize * 0.8;
+      const descent = metrics.actualBoundingBoxDescent || fontSize * 0.2;
+      const lineHeight = (ascent + descent) * 1.1; // gần giống line-height mặc định
 
       const maxWidth = (typeof item.width === "number" && item.width > 0)
         ? scaleValue(item.width, scaleX)
@@ -651,17 +660,22 @@
         ctx.lineWidth = 0;
       }
 
-      const lineHeight = fontSize * 1.15;
-
       if (maxWidth) {
-        drawWrappedText(ctx, text, x, yTop, maxWidth, lineHeight, doStroke);
+        drawWrappedTextWithBaseline(ctx, text, x, topY, maxWidth, lineHeight, ascent, doStroke);
       } else {
-        if (doStroke) ctx.strokeText(text, x, yTop);
-        ctx.fillText(text, x, yTop);
+        const baselineY = topY + ascent;
+        if (doStroke) ctx.strokeText(text, x, baselineY);
+        ctx.fillText(text, x, baselineY);
       }
     }
 
+    // ===== LINE: dùng left/top/width/height là bounding box sau rotate =====
     function drawLineItem(ctx, item, canvasW, canvasH, scaleX, scaleY) {
+      const rectX = computeCoord(item.left, item.leftPercent, canvasW, scaleX);
+      const rectY = computeCoord(item.top, item.topPercent, canvasH, scaleY);
+      const rectW = scaleValue(item.width || item.lineLength || 200, scaleX);
+      const rectH = scaleValue(item.height || item.lineThickness || 4, scaleY);
+
       const baseLength = (typeof item.lineLength === "number" ? item.lineLength :
         (typeof item.width === "number" ? item.width : 200));
       const baseThickness = (typeof item.lineThickness === "number" ? item.lineThickness :
@@ -673,11 +687,9 @@
       const angleDeg = item.lineAngle || 0;
       const angleRad = angleDeg * Math.PI / 180;
 
-      const x = computeCoord(item.left, item.leftPercent, canvasW, scaleX);
-      const y = computeCoord(item.top, item.topPercent, canvasH, scaleY);
-
-      const cx = x + length / 2;
-      const cy = y + thickness / 2;
+      // center của bounding box (y chang overlay-tool)
+      const cx = rectX + rectW / 2;
+      const cy = rectY + rectH / 2;
 
       ctx.save();
       ctx.translate(cx, cy);
@@ -716,17 +728,15 @@
         ctx.rect(x, y, w, h);
       }
 
-      let fillStyle;
       if (fade) {
         const grad = ctx.createLinearGradient(x, y, x + w, y);
         grad.addColorStop(0, hexToRgba(color, opacity));
         grad.addColorStop(1, hexToRgba(color, 0));
-        fillStyle = grad;
+        ctx.fillStyle = grad;
       } else {
-        fillStyle = hexToRgba(color, opacity);
+        ctx.fillStyle = hexToRgba(color, opacity);
       }
 
-      ctx.fillStyle = fillStyle;
       ctx.fill();
       ctx.restore();
     }
@@ -759,6 +769,16 @@
     }
 
     // ===== camera =====
+    async function waitFontsReady() {
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (e) {
+          console.log("fonts.ready error", e);
+        }
+      }
+    }
+
     async function startCamera() {
       try {
         cameraStatus.textContent = "Đang mở camera...";
@@ -774,7 +794,9 @@
         mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
         videoSource.srcObject = mediaStream;
         await videoSource.play().catch(() => {});
-        cameraStatus.textContent = "Camera đã sẵn sàng. Giữ máy dọc để chụp.";
+        cameraStatus.textContent = "Camera đã sẵn sàng. Đang chờ font...";
+        await waitFontsReady();
+        cameraStatus.textContent = "Camera + font sẵn sàng. Giữ máy dọc để chụp.";
         startPreviewLoop();
       } catch (err) {
         console.error(err);
