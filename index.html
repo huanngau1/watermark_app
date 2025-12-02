@@ -1,997 +1,987 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-    <meta charset="UTF-8" />
-    <title>Chattime Capture</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta charset="UTF-8" />
+  <title>Chattime Capture</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 
-    <!-- Fonts giống watermark -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700&family=Roboto:wght@100;300;400;500;700;900&family=Roboto+Condensed:wght@300;400;500;700&display=swap"
-        rel="stylesheet" />
+  <!-- Fonts giống watermark -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700&family=Roboto:wght@100;300;400;500;700;900&family=Roboto+Condensed:wght@300;400;500;700&display=swap"
+    rel="stylesheet"
+  />
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+  <style>
+    * { box-sizing: border-box; }
 
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: #050505;
-            color: #f5f5f5;
-        }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #050505;
+      color: #f5f5f5;
+    }
 
-        body {
-            display: flex;
-            align-items: stretch;
-            justify-content: center;
-        }
+    body {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
 
-        .app {
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            padding: 12px;
-            gap: 12px;
-        }
+    .app {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      gap: 12px;
+    }
 
-        h1 {
-            font-size: 18px;
-            margin: 0;
-            text-align: center;
-        }
+    h1 {
+      font-size: 18px;
+      margin: 0;
+      text-align: center;
+    }
 
-        .card {
-            background: #121212;
-            border-radius: 12px;
-            padding: 12px 12px 14px;
-            box-shadow: 0 0 0 1px #222, 0 10px 30px rgba(0, 0, 0, 0.7);
-        }
+    .card {
+      background: #121212;
+      border-radius: 12px;
+      padding: 12px 12px 14px;
+      box-shadow: 0 0 0 1px #222, 0 10px 30px rgba(0,0,0,0.7);
+    }
 
-        .card h2 {
-            font-size: 15px;
-            margin: 0 0 8px;
-        }
+    .card h2 {
+      font-size: 15px;
+      margin: 0 0 8px;
+    }
 
-        label {
-            font-size: 13px;
-            display: block;
-            margin-bottom: 4px;
-        }
+    label {
+      font-size: 13px;
+      display: block;
+      margin-bottom: 4px;
+    }
 
-        input[type="text"],
-        input[type="time"],
-        input[type="file"],
-        button {
-            width: 100%;
-            padding: 8px 10px;
-            border-radius: 6px;
-            border: 1px solid #333;
-            background: #1c1c1c;
-            color: #eee;
-            font-size: 14px;
-        }
+    input[type="text"],
+    input[type="time"],
+    input[type="file"],
+    button {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background: #1c1c1c;
+      color: #eee;
+      font-size: 14px;
+    }
 
-        input[type="file"] {
-            padding: 4px 0;
-            background: transparent;
-            border: none;
-        }
+    input[type="file"] {
+      padding: 4px 0;
+      background: transparent;
+      border: none;
+    }
 
-        input::placeholder {
-            color: #777;
-        }
+    input::placeholder {
+      color: #777;
+    }
 
-        .row {
-            display: flex;
-            gap: 8px;
-        }
+    .row {
+      display: flex;
+      gap: 8px;
+    }
 
-        .row>div {
-            flex: 1;
-        }
+    .row > div {
+      flex: 1;
+    }
 
-        .hint {
-            font-size: 11px;
-            color: #999;
-            margin-top: 4px;
-        }
+    .hint {
+      font-size: 11px;
+      color: #999;
+      margin-top: 4px;
+    }
 
-        button {
-            cursor: pointer;
-            font-weight: 600;
-            background: #0f766e;
-            border-color: #0f766e;
-        }
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      background: #0f766e;
+      border-color: #0f766e;
+    }
 
-        button.secondary {
-            background: #2a2a2a;
-            border-color: #444;
-        }
+    button.secondary {
+      background: #2a2a2a;
+      border-color: #444;
+    }
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: default;
-        }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
 
-        #step-camera,
-        #step-result {
-            display: none;
-        }
+    #step-camera,
+    #step-result {
+      display: none;
+    }
 
-        .frame-wrapper {
-            display: flex;
-            justify-content: center;
-            margin-top: 8px;
-        }
+    .frame-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-top: 8px;
+    }
 
-        .frame {
-            position: relative;
-            width: 100%;
-            max-width: 360px;
-            aspect-ratio: 3/4;
-            /* gần 960x1280 */
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 0 0 1px #222;
-        }
+    .frame {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+      aspect-ratio: 3/4; /* gần 960x1280 */
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px #222;
+    }
 
-        #videoPreview {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            background: #000;
-        }
+    #videoPreview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
 
-        #resultImage {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            background: #000;
-        }
+    #resultImage {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
 
-        .status {
-            font-size: 12px;
-            color: #ccc;
-            white-space: pre-line;
-            margin-top: 4px;
-        }
+    .status {
+      font-size: 12px;
+      color: #ccc;
+      white-space: pre-line;
+      margin-top: 4px;
+    }
 
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 999px;
-            background: #1e293b;
-            font-size: 11px;
-            color: #e5e7eb;
-            margin-left: 4px;
-        }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #1e293b;
+      font-size: 11px;
+      color: #e5e7eb;
+      margin-left: 4px;
+    }
 
-        .actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
 
-        .actions button {
-            flex: 1;
-        }
-    </style>
+    .actions button {
+      flex: 1;
+    }
+  </style>
 </head>
-
 <body>
-    <div class="app">
-        <h1>Chattime Capture</h1>
+  <div class="app">
+    <h1>Chattime Capture</h1>
 
-        <!-- STEP 1: cấu hình thông tin + JSON -->
-        <section id="step-config" class="card">
-            <h2>Bước 1: Thông tin watermark</h2>
+    <!-- STEP 1: cấu hình thông tin + JSON -->
+    <section id="step-config" class="card">
+      <h2>Bước 1: Thông tin watermark</h2>
 
-            <div class="row">
-                <div>
-                    <label for="timeInput">Giờ (HH:MM)</label>
-                    <input id="timeInput" type="time" step="60">
-                </div>
-                <div>
-                    <label>Ngày & Thứ (UTC+7)</label>
-                    <div id="datePreview" class="hint"></div>
-                </div>
-            </div>
+      <div class="row">
+        <div>
+          <label for="timeInput">Giờ (HH:MM)</label>
+          <input id="timeInput" type="time" step="60">
+        </div>
+        <div>
+          <label>Ngày & Thứ (UTC+7)</label>
+          <div id="datePreview" class="hint"></div>
+        </div>
+      </div>
 
-            <div class="control-group" style="margin-top:8px;">
-                <label for="nameInput">Họ tên</label>
-                <input id="nameInput" type="text" placeholder="Họ tên người dùng">
-            </div>
+      <div class="control-group" style="margin-top:8px;">
+        <label for="nameInput">Họ tên</label>
+        <input id="nameInput" type="text" placeholder="Họ tên người dùng">
+      </div>
 
-            <div class="control-group" style="margin-top:8px;">
-                <label for="addressInput">Địa chỉ</label>
-                <input id="addressInput" type="text" placeholder="Địa chỉ chụp (số nhà, đường, phường...)">
-            </div>
+      <div class="control-group" style="margin-top:8px;">
+        <label for="addressInput">Địa chỉ</label>
+        <input id="addressInput" type="text" placeholder="Địa chỉ chụp (số nhà, đường, phường...)">
+      </div>
 
-            <div class="control-group" style="margin-top:8px;">
-                <label for="layoutFile">Layout JSON (tùy chọn)</label>
-                <input id="layoutFile" type="file" accept="application/json">
-                <div class="hint">
-                    Nếu không chọn, sẽ dùng layout mặc định (960×1280).<br>
-                    JSON xuất từ overlay-tool: giữ nguyên id/text để tool tự map.
-                </div>
-                <div id="layoutInfo" class="status"></div>
-            </div>
+      <div class="control-group" style="margin-top:8px;">
+        <label for="layoutFile">Layout JSON (tùy chọn)</label>
+        <input id="layoutFile" type="file" accept="application/json">
+        <div class="hint">
+          Nếu không chọn, sẽ dùng layout mặc định (960×1280).<br>
+          JSON xuất từ overlay-tool: giữ nguyên id/text để tool tự map.
+        </div>
+        <div id="layoutInfo" class="status"></div>
+      </div>
 
-            <div class="control-group" style="margin-top:8px;">
-                <button id="startCameraBtn">Xác nhận & mở camera</button>
-                <div id="configStatus" class="status"></div>
-            </div>
-        </section>
+      <div class="control-group" style="margin-top:8px;">
+        <button id="startCameraBtn">Xác nhận & mở camera</button>
+        <div id="configStatus" class="status"></div>
+      </div>
+    </section>
 
-        <!-- STEP 2: camera -->
-        <section id="step-camera" class="card">
-            <h2>Bước 2: Chụp ảnh <span class="badge">960×1280 output</span></h2>
+    <!-- STEP 2: camera -->
+    <section id="step-camera" class="card">
+      <h2>Bước 2: Chụp ảnh <span class="badge">960×1280 output</span></h2>
 
-            <div class="frame-wrapper">
-                <div class="frame">
-                    <video id="videoPreview" autoplay playsinline muted></video>
-                </div>
-            </div>
+      <div class="frame-wrapper">
+        <div class="frame">
+          <video id="videoPreview" autoplay playsinline muted></video>
+        </div>
+      </div>
 
-            <div class="actions">
-                <button id="captureBtn">Chụp</button>
-                <button id="backBtn" class="secondary">Quay lại</button>
-            </div>
+      <div class="actions">
+        <button id="captureBtn">Chụp</button>
+        <button id="backBtn" class="secondary">Quay lại</button>
+      </div>
 
-            <div id="cameraStatus" class="status"></div>
-        </section>
+      <div id="cameraStatus" class="status"></div>
+    </section>
 
-        <!-- STEP 3: kết quả -->
-        <section id="step-result" class="card">
-            <h2>Bước 3: Kết quả</h2>
+    <!-- STEP 3: kết quả -->
+    <section id="step-result" class="card">
+      <h2>Bước 3: Kết quả</h2>
 
-            <div class="frame-wrapper">
-                <div class="frame">
-                    <img id="resultImage" alt="Kết quả" />
-                </div>
-            </div>
+      <div class="frame-wrapper">
+        <div class="frame">
+          <img id="resultImage" alt="Kết quả" />
+        </div>
+      </div>
 
-            <div class="actions">
-                <button id="downloadBtn">Tải ảnh về</button>
-                <button id="retakeBtn" class="secondary">Chụp lại</button>
-            </div>
+      <div class="actions">
+        <button id="downloadBtn">Tải ảnh về</button>
+        <button id="retakeBtn" class="secondary">Chụp lại</button>
+      </div>
 
-            <div class="hint" style="margin-top:6px;">
-                Trên điện thoại có thể chạm giữ vào ảnh để lưu (nếu nút tải không hoạt động).
-            </div>
-        </section>
+      <div class="hint" style="margin-top:6px;">
+        Nếu nút tải không hoạt động trên điện thoại, chạm & giữ vào ảnh để lưu.
+      </div>
+    </section>
 
-        <!-- canvas ẩn để render -->
-        <canvas id="captureCanvas" width="960" height="1280" style="display:none;"></canvas>
-    </div>
+    <!-- canvas ẩn để render -->
+    <canvas id="captureCanvas" width="960" height="1280" style="display:none;"></canvas>
+  </div>
 
-    <script>
-        // ====== DOM refs ======
-        const stepConfig = document.getElementById("step-config");
-        const stepCamera = document.getElementById("step-camera");
-        const stepResult = document.getElementById("step-result");
+  <script>
+    // ====== DOM refs ======
+    const stepConfig = document.getElementById("step-config");
+    const stepCamera = document.getElementById("step-camera");
+    const stepResult = document.getElementById("step-result");
 
-        const timeInput = document.getElementById("timeInput");
-        const nameInput = document.getElementById("nameInput");
-        const addressInput = document.getElementById("addressInput");
-        const datePreview = document.getElementById("datePreview");
+    const timeInput = document.getElementById("timeInput");
+    const nameInput = document.getElementById("nameInput");
+    const addressInput = document.getElementById("addressInput");
+    const datePreview = document.getElementById("datePreview");
 
-        const layoutFileInput = document.getElementById("layoutFile");
-        const layoutInfo = document.getElementById("layoutInfo");
-        const configStatus = document.getElementById("configStatus");
+    const layoutFileInput = document.getElementById("layoutFile");
+    const layoutInfo = document.getElementById("layoutInfo");
+    const configStatus = document.getElementById("configStatus");
 
-        const startCameraBtn = document.getElementById("startCameraBtn");
-        const backBtn = document.getElementById("backBtn");
-        const captureBtn = document.getElementById("captureBtn");
-        const cameraStatus = document.getElementById("cameraStatus");
+    const startCameraBtn = document.getElementById("startCameraBtn");
+    const backBtn = document.getElementById("backBtn");
+    const captureBtn = document.getElementById("captureBtn");
+    const cameraStatus = document.getElementById("cameraStatus");
 
-        const resultImage = document.getElementById("resultImage");
-        const downloadBtn = document.getElementById("downloadBtn");
-        const retakeBtn = document.getElementById("retakeBtn");
+    const resultImage = document.getElementById("resultImage");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const retakeBtn = document.getElementById("retakeBtn");
 
-        const videoPreview = document.getElementById("videoPreview");
-        const captureCanvas = document.getElementById("captureCanvas");
+    const videoPreview = document.getElementById("videoPreview");
+    const captureCanvas = document.getElementById("captureCanvas");
 
-        // ====== state ======
-        let currentLayout = null;
-        let bindings = null;  // map time/date/weekday/address/name
-        let mediaStream = null;
+    // ====== state ======
+    let currentLayout = null;
+    let bindings = null;  // map time/date/weekday/address/name
+    let mediaStream = null;
 
-        // ====== default layout (base 960x1280) ======
-        const defaultLayout = {
-            imageWidth: 960,
-            imageHeight: 1280,
-            items: [
-                {
-                    id: "time",  // 19:35
-                    type: "text",
-                    left: -6,
-                    top: 967,
-                    width: 212,
-                    height: 128,
-                    leftPercent: -0.0063,
-                    topPercent: 0.7555,
-                    text: "19:35",
-                    fontFamily: "\"Big Shoulders Display\", sans-serif",
-                    fontSize: 100,
-                    fontWeight: "700",
-                    color: "#ffffff",
-                    strokeWidth: 1,
-                    strokeColor: "#000000",
-                    strokeOpacity: 0.05
-                },
-                {
-                    id: "line-1",
-                    type: "line",
-                    left: 148,
-                    top: 1016,
-                    width: 119,
-                    height: 26,
-                    leftPercent: 0.1542,
-                    topPercent: 0.7937,
-                    lineLength: 85,
-                    lineThickness: 4,
-                    lineColor: "#e0b642",
-                    lineAngle: 90
-                },
-                {
-                    id: "date", // 17 Tháng 11, 2025
-                    type: "text",
-                    left: 209,
-                    top: 976,
-                    width: 260,
-                    height: 46,
-                    leftPercent: 0.2176,
-                    topPercent: 0.7625,
-                    text: "17 Tháng 11, 2025",
-                    fontFamily: "\"Roboto Condensed\", sans-serif",
-                    fontSize: 31,
-                    fontWeight: "400",
-                    color: "#ffffff",
-                    strokeWidth: 1,
-                    strokeColor: "#585555",
-                    strokeOpacity: 0.65
-                },
-                {
-                    id: "address",
-                    type: "text",
-                    left: -3,
-                    top: 1088,
-                    width: 634,
-                    height: 84,
-                    leftPercent: -0.0031,
-                    topPercent: 0.85,
-                    text: "19 Bùi Quốc Khái, P. Long Thạnh Mỹ, TP. Thủ Đức,Thành Phố Hồ Chí Minh",
-                    fontFamily: "\"Roboto Condensed\", sans-serif",
-                    fontSize: 31,
-                    fontWeight: "400",
-                    color: "#ffffff",
-                    strokeWidth: 1,
-                    strokeColor: "#555555",
-                    strokeOpacity: 0.25
-                },
-                {
-                    id: "weekday",
-                    type: "text",
-                    left: 211,
-                    top: 1035,
-                    width: 130,
-                    height: 46,
-                    leftPercent: 0.2198,
-                    topPercent: 0.8086,
-                    text: "Thứ Hai",
-                    fontFamily: "\"Roboto Condensed\", sans-serif",
-                    fontSize: 31,
-                    fontWeight: "400",
-                    color: "#ffffff",
-                    strokeWidth: 1,
-                    strokeColor: "#555555",
-                    strokeOpacity: 0.25
-                },
-                {
-                    id: "name",
-                    type: "text",
-                    left: 14,
-                    top: 1193,
-                    width: 317,
-                    height: 46,
-                    leftPercent: 0.0146,
-                    topPercent: 0.932,
-                    text: "Họ tên: TRẦN GIA LINH",
-                    fontFamily: "\"Roboto Condensed\", sans-serif",
-                    fontSize: 31,
-                    fontWeight: "400",
-                    color: "#ffffff",
-                    strokeWidth: 1,
-                    strokeColor: "#555555",
-                    strokeOpacity: 0.25
-                },
-                {
-                    id: "logo-main-1",
-                    type: "text",
-                    left: 785,
-                    top: 1202,
-                    width: 101,
-                    height: 48,
-                    leftPercent: 0.8177,
-                    topPercent: 0.9391,
-                    text: "Time",
-                    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
-                    fontSize: 30,
-                    fontWeight: "500",
-                    color: "#d3ac21",
-                    strokeWidth: 1,
-                    strokeColor: "#555555",
-                    strokeOpacity: 0.25
-                },
-                {
-                    id: "logo-sub",
-                    type: "text",
-                    left: 790,
-                    top: 1239,
-                    width: 162,
-                    height: 34,
-                    leftPercent: 0.8229,
-                    topPercent: 0.968,
-                    text: "100% Chân thực",
-                    fontFamily: "\"Roboto Condensed\", sans-serif",
-                    fontSize: 20,
-                    fontWeight: "500",
-                    color: "#ffffff",
-                    strokeWidth: 1,
-                    strokeColor: "#555555",
-                    strokeOpacity: 0.25
-                },
-                {
-                    id: "logo-main-2",
-                    type: "text",
-                    left: 851,
-                    top: 1202,
-                    width: 103,
-                    height: 48,
-                    leftPercent: 0.8865,
-                    topPercent: 0.9391,
-                    text: "mark",
-                    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
-                    fontSize: 30,
-                    fontWeight: "500",
-                    color: "#ffffff",
-                    strokeWidth: 1,
-                    strokeColor: "#555555",
-                    strokeOpacity: 0.25
-                },
-                // Rectangle cho nền tên (optional)
-                {
-                    id: "name-rect",
-                    type: "rect",
-                    left: 10,
-                    top: 1180,
-                    width: 302,
-                    height: 77,
-                    leftPercent: 0.0104,
-                    topPercent: 0.92,
-                    rectWidth: 302,
-                    rectHeight: 77,
-                    rectFillColor: "#000000",
-                    rectOpacity: 0.3,
-                    rectRadius: 6,
-                    rectGradient: "fade-ltr",
-                    rectFade: true
-                }
-            ]
+    // ====== default layout (base 960x1280) ======
+    const defaultLayout = {
+      imageWidth: 960,
+      imageHeight: 1280,
+      items: [
+        {
+          id: "time",  // 19:35
+          type: "text",
+          left: -6,
+          top: 967,
+          width: 212,
+          height: 128,
+          leftPercent: -0.0063,
+          topPercent: 0.7555,
+          text: "19:35",
+          fontFamily: "\"Big Shoulders Display\", sans-serif",
+          fontSize: 100,
+          fontWeight: "700",
+          color: "#ffffff",
+          strokeWidth: 1,
+          strokeColor: "#000000",
+          strokeOpacity: 0.05
+        },
+        {
+          id: "line-1",
+          type: "line",
+          left: 148,
+          top: 1016,
+          width: 119,
+          height: 26,
+          leftPercent: 0.1542,
+          topPercent: 0.7937,
+          lineLength: 85,
+          lineThickness: 4,
+          lineColor: "#e0b642",
+          lineAngle: 90
+        },
+        {
+          id: "date", // 17 Tháng 11, 2025
+          type: "text",
+          left: 209,
+          top: 976,
+          width: 260,
+          height: 46,
+          leftPercent: 0.2176,
+          topPercent: 0.7625,
+          text: "17 Tháng 11, 2025",
+          fontFamily: "\"Roboto Condensed\", sans-serif",
+          fontSize: 31,
+          fontWeight: "400",
+          color: "#ffffff",
+          strokeWidth: 1,
+          strokeColor: "#585555",
+          strokeOpacity: 0.65
+        },
+        {
+          id: "address",
+          type: "text",
+          left: -3,
+          top: 1088,
+          width: 634,
+          height: 84,
+          leftPercent: -0.0031,
+          topPercent: 0.85,
+          text: "19 Bùi Quốc Khái, P. Long Thạnh Mỹ, TP. Thủ Đức,Thành Phố Hồ Chí Minh",
+          fontFamily: "\"Roboto Condensed\", sans-serif",
+          fontSize: 31,
+          fontWeight: "400",
+          color: "#ffffff",
+          strokeWidth: 1,
+          strokeColor: "#555555",
+          strokeOpacity: 0.25
+        },
+        {
+          id: "weekday",
+          type: "text",
+          left: 211,
+          top: 1035,
+          width: 130,
+          height: 46,
+          leftPercent: 0.2198,
+          topPercent: 0.8086,
+          text: "Thứ Hai",
+          fontFamily: "\"Roboto Condensed\", sans-serif",
+          fontSize: 31,
+          fontWeight: "400",
+          color: "#ffffff",
+          strokeWidth: 1,
+          strokeColor: "#555555",
+          strokeOpacity: 0.25
+        },
+        {
+          id: "name",
+          type: "text",
+          left: 14,
+          top: 1193,
+          width: 317,
+          height: 46,
+          leftPercent: 0.0146,
+          topPercent: 0.932,
+          text: "Họ tên: TRẦN GIA LINH",
+          fontFamily: "\"Roboto Condensed\", sans-serif",
+          fontSize: 31,
+          fontWeight: "400",
+          color: "#ffffff",
+          strokeWidth: 1,
+          strokeColor: "#555555",
+          strokeOpacity: 0.25
+        },
+        {
+          id: "logo-main-1",
+          type: "text",
+          left: 785,
+          top: 1202,
+          width: 101,
+          height: 48,
+          leftPercent: 0.8177,
+          topPercent: 0.9391,
+          text: "Time",
+          fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          fontSize: 30,
+          fontWeight: "500",
+          color: "#d3ac21",
+          strokeWidth: 1,
+          strokeColor: "#555555",
+          strokeOpacity: 0.25
+        },
+        {
+          id: "logo-sub",
+          type: "text",
+          left: 790,
+          top: 1239,
+          width: 162,
+          height: 34,
+          leftPercent: 0.8229,
+          topPercent: 0.968,
+          text: "100% Chân thực",
+          fontFamily: "\"Roboto Condensed\", sans-serif",
+          fontSize: 20,
+          fontWeight: "500",
+          color: "#ffffff",
+          strokeWidth: 1,
+          strokeColor: "#555555",
+          strokeOpacity: 0.25
+        },
+        {
+          id: "logo-main-2",
+          type: "text",
+          left: 851,
+          top: 1202,
+          width: 103,
+          height: 48,
+          leftPercent: 0.8865,
+          topPercent: 0.9391,
+          text: "mark",
+          fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          fontSize: 30,
+          fontWeight: "500",
+          color: "#ffffff",
+          strokeWidth: 1,
+          strokeColor: "#555555",
+          strokeOpacity: 0.25
+        },
+        {
+          id: "name-rect",
+          type: "rect",
+          left: 10,
+          top: 1180,
+          width: 302,
+          height: 77,
+          leftPercent: 0.0104,
+          topPercent: 0.92,
+          rectWidth: 302,
+          rectHeight: 77,
+          rectFillColor: "#000000",
+          rectOpacity: 0.3,
+          rectRadius: 6,
+          rectGradient: "fade-ltr",
+          rectFade: true
+        }
+      ]
+    };
+
+    // ====== util: date/time ======
+    function pad2(n) {
+      return n < 10 ? "0" + n : "" + n;
+    }
+
+    function getNowVietnam() {
+      const now = new Date();
+      const fmtDate = new Intl.DateTimeFormat("vi-VN", {
+        timeZone: "Asia/Bangkok",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      });
+      const fmtWeekday = new Intl.DateTimeFormat("vi-VN", {
+        timeZone: "Asia/Bangkok",
+        weekday: "long"
+      });
+      const fmtTime = new Intl.DateTimeFormat("vi-VN", {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+
+      const [day, month, year] = fmtDate.format(now).split("/");
+      const weekdayRaw = fmtWeekday.format(now);
+      const weekday = weekdayRaw.charAt(0).toUpperCase() + weekdayRaw.slice(1);
+      const timeStr = fmtTime.format(now);
+      const dateStr = `${day} Tháng ${parseInt(month, 10)}, ${year}`;
+
+      return { day, month, year, weekday, timeStr, dateStr };
+    }
+
+    function updateDatePreview() {
+      const { dateStr, weekday, timeStr } = getNowVietnam();
+      if (!timeInput.value) {
+        timeInput.value = timeStr;
+      }
+      datePreview.textContent = `${dateStr}\n${weekday}`;
+    }
+
+    // ====== hex/rgba helper ======
+    function hexToRgba(input, alpha) {
+      let hex = (input || "").trim();
+      if (!hex) return input || "";
+
+      const rgbaMatch = hex.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/i);
+      if (rgbaMatch) {
+        const r = parseInt(rgbaMatch[1], 10);
+        const g = parseInt(rgbaMatch[2], 10);
+        const b = parseInt(rgbaMatch[3], 10);
+        const a = (typeof alpha === "number")
+          ? alpha
+          : (rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1);
+        return `rgba(${r}, ${g}, ${b}, ${a})`;
+      }
+
+      if (hex[0] === "#") hex = hex.slice(1);
+      if (hex.length === 3) {
+        hex = hex.split("").map(c => c + c).join("");
+      }
+      if (hex.length === 6) {
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        const a = (typeof alpha === "number") ? alpha : 1;
+        return `rgba(${r}, ${g}, ${b}, ${a})`;
+      }
+      return input;
+    }
+
+    // ====== layout helper ======
+    function computeCoord(px, percent, total, scale) {
+      if (typeof percent === "number") return percent * total;
+      if (typeof px === "number") return px * scale;
+      return 0;
+    }
+
+    function scaleValue(v, scale) {
+      if (typeof v !== "number") return v;
+      return v * scale;
+    }
+
+    function analyzeBindings(layout) {
+      const items = layout.items || [];
+      let timeItem = null;
+      let dateItem = null;
+      let weekdayItem = null;
+      let addressItem = null;
+      let nameItem = null;
+
+      for (const it of items) {
+        if (it.type !== "text") continue;
+        const id = it.id || "";
+        if (!timeItem && (id === "time" || id === "text-1")) timeItem = it;
+        if (!dateItem && (id === "date" || id === "text-2")) dateItem = it;
+        if (!addressItem && (id === "address" || id === "text-3")) addressItem = it;
+        if (!weekdayItem && (id === "weekday" || id === "text-4")) weekdayItem = it;
+        if (!nameItem && (id === "name" || id === "text-5")) nameItem = it;
+      }
+
+      for (const it of items) {
+        if (it.type !== "text") continue;
+        const txt = (it.text || "").trim();
+        if (!timeItem && /^\d{1,2}:\d{2}$/.test(txt)) timeItem = it;
+        if (!dateItem && /Tháng\s+\d+,\s+\d{4}/.test(txt)) dateItem = it;
+        if (!weekdayItem && /Thứ|Chủ Nhật|Chủ nhật/.test(txt)) weekdayItem = it;
+        if (!nameItem && /^Họ tên/i.test(txt)) nameItem = it;
+      }
+
+      if (!addressItem) {
+        let longest = null;
+        for (const it of items) {
+          if (it.type !== "text") continue;
+          if (it === timeItem || it === dateItem || it === weekdayItem || it === nameItem) continue;
+          if (!longest || (it.text || "").length > (longest.text || "").length) {
+            longest = it;
+          }
+        }
+        addressItem = longest;
+      }
+
+      return { timeItem, dateItem, weekdayItem, addressItem, nameItem };
+    }
+
+    // ====== DRAW TEXT (canvas) ======
+    function drawWrappedText(ctx, text, x, firstBaselineY, maxWidth, lineHeight) {
+      const words = text.split(/\s+/);
+      let line = "";
+      let y = firstBaselineY;
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line ? (line + " " + words[i]) : words[i];
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && line) {
+          ctx.fillText(line, x, y);
+          y += lineHeight;
+          line = words[i];
+        } else {
+          line = testLine;
+        }
+      }
+      if (line) ctx.fillText(line, x, y);
+    }
+
+    function drawWrappedTextStroke(ctx, text, x, firstBaselineY, maxWidth, lineHeight) {
+      const words = text.split(/\s+/);
+      let line = "";
+      let y = firstBaselineY;
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line ? (line + " " + words[i]) : words[i];
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && line) {
+          ctx.strokeText(line, x, y);
+          y += lineHeight;
+          line = words[i];
+        } else {
+          line = testLine;
+        }
+      }
+      if (line) ctx.strokeText(line, x, y);
+    }
+
+    function drawTextItem(ctx, item, canvasW, canvasH, scaleX, scaleY, overrideText) {
+      const x = computeCoord(item.left, item.leftPercent, canvasW, scaleX);
+      const yTop = computeCoord(item.top, item.topPercent, canvasH, scaleY);
+
+      const fontSize = scaleValue(item.fontSize || 20, scaleY);
+      const fontWeight = item.fontWeight || "400";
+      const fontFamily = item.fontFamily || "sans-serif";
+
+      ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+      ctx.fillStyle = item.color || "#ffffff";
+
+      const text = (overrideText != null ? overrideText : (item.text || "")).toString();
+
+      const maxWidth = (typeof item.width === "number" && item.width > 0)
+        ? scaleValue(item.width, scaleX)
+        : null;
+
+      const sw = item.strokeWidth || 0;
+      const sc = item.strokeColor || "#000000";
+      const so = (item.strokeOpacity === undefined ? 0 : item.strokeOpacity);
+      if (sw > 0 && so > 0) {
+        ctx.strokeStyle = hexToRgba(sc, so);
+        ctx.lineWidth = sw * scaleY * 2;
+      } else {
+        ctx.lineWidth = 0;
+      }
+
+      // dùng TextMetrics để canh top ~ yTop
+      const testLine = text.split(/\n/)[0] || text;
+      const metrics = ctx.measureText(testLine);
+      const ascent = metrics.actualBoundingBoxAscent || fontSize * 0.8;
+      const lineHeight = fontSize * 1.15;
+      const firstBaselineY = yTop + ascent;
+
+      if (maxWidth) {
+        if (ctx.lineWidth > 0) {
+          drawWrappedTextStroke(ctx, text, x, firstBaselineY, maxWidth, lineHeight);
+        }
+        drawWrappedText(ctx, text, x, firstBaselineY, maxWidth, lineHeight);
+      } else {
+        if (ctx.lineWidth > 0) {
+          ctx.strokeText(text, x, firstBaselineY);
+        }
+        ctx.fillText(text, x, firstBaselineY);
+      }
+    }
+
+    function drawLineItem(ctx, item, canvasW, canvasH, scaleX, scaleY) {
+      const baseLength = (typeof item.lineLength === "number" ? item.lineLength :
+        (typeof item.width === "number" ? item.width : 200));
+      const baseThickness = (typeof item.lineThickness === "number" ? item.lineThickness :
+        (typeof item.height === "number" ? item.height : 4));
+
+      const length = scaleValue(baseLength, scaleX);
+      const thickness = scaleValue(baseThickness, scaleY);
+      const color = item.lineColor || "#e0b642";
+      const angleDeg = item.lineAngle || 0;
+      const angleRad = angleDeg * Math.PI / 180;
+
+      const x = computeCoord(item.left, item.leftPercent, canvasW, scaleX);
+      const y = computeCoord(item.top, item.topPercent, canvasH, scaleY);
+
+      const cx = x + length / 2;
+      const cy = y + thickness / 2;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angleRad);
+      ctx.fillStyle = color;
+      ctx.fillRect(-length / 2, -thickness / 2, length, thickness);
+      ctx.restore();
+    }
+
+    function drawRectItem(ctx, item, canvasW, canvasH, scaleX, scaleY) {
+      const baseW = (typeof item.rectWidth === "number" ? item.rectWidth :
+        (typeof item.width === "number" ? item.width : 200));
+      const baseH = (typeof item.rectHeight === "number" ? item.rectHeight :
+        (typeof item.height === "number" ? item.height : 80));
+
+      const w = scaleValue(baseW, scaleX);
+      const h = scaleValue(baseH, scaleY);
+
+      const x = computeCoord(item.left, item.leftPercent, canvasW, scaleX);
+      const y = computeCoord(item.top, item.topPercent, canvasH, scaleY);
+
+      const color = item.rectFillColor || "rgba(0,0,0,0.3)";
+      const opacity = (item.rectOpacity === undefined ? 0.3 : item.rectOpacity);
+      const radius = scaleValue(item.rectRadius || 0, (scaleX + scaleY) / 2);
+
+      const fade =
+        item.rectGradient === "fade-ltr" ||
+        item.rectFade === true ||
+        item.rectFade === "true";
+
+      let gradient = null;
+      if (fade) {
+        gradient = ctx.createLinearGradient(x, y, x + w, y);
+        gradient.addColorStop(0, hexToRgba(color, opacity));
+        gradient.addColorStop(1, hexToRgba(color, 0));
+      }
+
+      ctx.save();
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(x, y, w, h, radius);
+      } else {
+        ctx.rect(x, y, w, h);
+      }
+      ctx.closePath();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = gradient || hexToRgba(color, opacity);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawWatermark(ctx, canvasW, canvasH, userData) {
+      const layout = currentLayout || defaultLayout;
+      const baseW = layout.imageWidth || canvasW;
+      const baseH = layout.imageHeight || canvasH;
+      const scaleX = canvasW / baseW;
+      const scaleY = canvasH / baseH;
+
+      const { timeItem, dateItem, weekdayItem, addressItem, nameItem } = bindings || {};
+
+      (layout.items || []).forEach(item => {
+        const type = item.type || "text";
+        if (type === "text") {
+          let override = null;
+          if (item === timeItem && userData.timeText) override = userData.timeText;
+          if (item === dateItem && userData.dateText) override = userData.dateText;
+          if (item === weekdayItem && userData.weekdayText) override = userData.weekdayText;
+          if (item === addressItem && userData.addressText) override = userData.addressText;
+          if (item === nameItem && userData.nameText) override = userData.nameText;
+          drawTextItem(ctx, item, canvasW, canvasH, scaleX, scaleY, override);
+        } else if (type === "line") {
+          drawLineItem(ctx, item, canvasW, canvasH, scaleX, scaleY);
+        } else if (type === "rect") {
+          drawRectItem(ctx, item, canvasW, canvasH, scaleX, scaleY);
+        }
+      });
+    }
+
+    // ====== camera ======
+    async function startCamera() {
+      try {
+        cameraStatus.textContent = "Đang mở camera...";
+        const constraints = {
+          video: {
+            facingMode: { ideal: "environment" }
+          },
+          audio: false
         };
+        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        videoPreview.srcObject = mediaStream;
+        cameraStatus.textContent = "Camera đã sẵn sàng. Giữ máy dọc để chụp.";
+      } catch (err) {
+        console.error(err);
+        cameraStatus.textContent = "Không mở được camera. Có thể do trình duyệt/HTTPS/quyền máy ảnh.";
+        alert("Không mở được camera. Trên mobile cần https và cấp quyền camera.");
+      }
+    }
 
-        // ====== util: date/time ======
-        function pad2(n) {
-            return n < 10 ? "0" + n : "" + n;
+    function stopCamera() {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(t => t.stop());
+        mediaStream = null;
+      }
+      videoPreview.srcObject = null;
+    }
+
+    // ====== flow ======
+    function goStepConfig() {
+      stepConfig.style.display = "block";
+      stepCamera.style.display = "none";
+      stepResult.style.display = "none";
+    }
+
+    function goStepCamera() {
+      stepConfig.style.display = "none";
+      stepCamera.style.display = "block";
+      stepResult.style.display = "none";
+    }
+
+    function goStepResult() {
+      stepConfig.style.display = "none";
+      stepCamera.style.display = "none";
+      stepResult.style.display = "block";
+    }
+
+    // ====== event handlers ======
+    updateDatePreview();
+    setInterval(updateDatePreview, 60_000);
+
+    layoutFileInput.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const json = JSON.parse(reader.result);
+          if (!Array.isArray(json.items)) throw new Error("No items");
+          currentLayout = json;
+          bindings = analyzeBindings(currentLayout);
+          layoutInfo.textContent =
+            `JSON: OK\nimageWidth=${json.imageWidth}, imageHeight=${json.imageHeight}\nitems=${json.items.length}`;
+        } catch (err) {
+          console.error(err);
+          currentLayout = null;
+          bindings = analyzeBindings(defaultLayout);
+          layoutInfo.textContent = "JSON không hợp lệ, dùng layout mặc định.";
+          alert("File JSON không hợp lệ. Sẽ dùng layout mặc định.");
         }
-
-        function getNowVietnam() {
-            // Dùng timezone Asia/Bangkok (UTC+7)
-            const now = new Date();
-            const fmtDate = new Intl.DateTimeFormat("vi-VN", {
-                timeZone: "Asia/Bangkok",
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric"
-            });
-            const fmtWeekday = new Intl.DateTimeFormat("vi-VN", {
-                timeZone: "Asia/Bangkok",
-                weekday: "long"
-            });
-            const fmtTime = new Intl.DateTimeFormat("vi-VN", {
-                timeZone: "Asia/Bangkok",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false
-            });
-
-            const [day, month, year] = fmtDate.format(now).split("/");
-            const weekdayRaw = fmtWeekday.format(now); // "thứ hai" / "chủ nhật"
-            const weekday =
-                weekdayRaw.charAt(0).toUpperCase() + weekdayRaw.slice(1);
-
-            const timeStr = fmtTime.format(now); // "19:35"
-            const dateStr = `${day} Tháng ${parseInt(month, 10)}, ${year}`;
-
-            return { day, month, year, weekday, timeStr, dateStr };
-        }
-
-        function updateDatePreview() {
-            const { dateStr, weekday, timeStr } = getNowVietnam();
-            if (!timeInput.value) {
-                // set mặc định time field = giờ hiện tại
-                timeInput.value = timeStr;
-            }
-            datePreview.textContent = `${dateStr}\n${weekday}`;
-        }
-
-        // ====== hex/rgba helper ======
-        function hexToRgba(input, alpha) {
-            let hex = (input || "").trim();
-            if (!hex) return input || "";
-
-            // nếu đã là rgb/rgba(...)
-            const rgbaMatch = hex.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/i);
-            if (rgbaMatch) {
-                const r = parseInt(rgbaMatch[1], 10);
-                const g = parseInt(rgbaMatch[2], 10);
-                const b = parseInt(rgbaMatch[3], 10);
-                const a = (typeof alpha === "number")
-                    ? alpha
-                    : (rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1);
-                return `rgba(${r}, ${g}, ${b}, ${a})`;
-            }
-
-            if (hex[0] === "#") hex = hex.slice(1);
-            if (hex.length === 3) {
-                hex = hex.split("").map(c => c + c).join("");
-            }
-            if (hex.length === 6) {
-                const r = parseInt(hex.slice(0, 2), 16);
-                const g = parseInt(hex.slice(2, 4), 16);
-                const b = parseInt(hex.slice(4, 6), 16);
-                const a = (typeof alpha === "number") ? alpha : 1;
-                return `rgba(${r}, ${g}, ${b}, ${a})`;
-            }
-            return input;
-        }
-
-        // ====== layout helper ======
-        function computeCoord(px, percent, total, scale) {
-            if (typeof percent === "number") return percent * total;
-            if (typeof px === "number") return px * scale;
-            return 0;
-        }
-
-        function scaleValue(v, scale) {
-            if (typeof v !== "number") return v;
-            return v * scale;
-        }
-
-        // Tìm map cho time/date/weekday/address/name trong layout
-        function analyzeBindings(layout) {
-            const items = layout.items || [];
-            let timeItem = null;
-            let dateItem = null;
-            let weekdayItem = null;
-            let addressItem = null;
-            let nameItem = null;
-
-            // ưu tiên match theo id
-            for (const it of items) {
-                if (it.type !== "text") continue;
-                const id = it.id || "";
-                if (!timeItem && (id === "time" || id === "text-1")) timeItem = it;
-                if (!dateItem && (id === "date" || id === "text-2")) dateItem = it;
-                if (!addressItem && (id === "address" || id === "text-3")) addressItem = it;
-                if (!weekdayItem && (id === "weekday" || id === "text-4")) weekdayItem = it;
-                if (!nameItem && (id === "name" || id === "text-5")) nameItem = it;
-            }
-
-            // fallback: đoán theo nội dung sample
-            for (const it of items) {
-                if (it.type !== "text") continue;
-                const txt = (it.text || "").trim();
-
-                if (!timeItem && /^\d{1,2}:\d{2}$/.test(txt)) timeItem = it;
-                if (!dateItem && /Tháng\s+\d+,\s+\d{4}/.test(txt)) dateItem = it;
-                if (!weekdayItem && /Thứ|Chủ Nhật|Chủ nhật/.test(txt)) weekdayItem = it;
-                if (!nameItem && /^Họ tên/i.test(txt)) nameItem = it;
-            }
-
-            // address: text dài nhất chưa được bắt
-            if (!addressItem) {
-                let longest = null;
-                for (const it of items) {
-                    if (it.type !== "text") continue;
-                    if (it === timeItem || it === dateItem || it === weekdayItem || it === nameItem) continue;
-                    if (!longest || (it.text || "").length > (longest.text || "").length) {
-                        longest = it;
-                    }
-                }
-                addressItem = longest;
-            }
-
-            return { timeItem, dateItem, weekdayItem, addressItem, nameItem };
-        }
-
-        // ====== vẽ watermark lên canvas ======
-        function drawWrappedText(ctx, text, x, yTop, maxWidth, lineHeight) {
-            const words = text.split(/\s+/);
-            let line = "";
-            let y = yTop;
-            for (let i = 0; i < words.length; i++) {
-                const testLine = line ? (line + " " + words[i]) : words[i];
-                const metrics = ctx.measureText(testLine);
-                if (metrics.width > maxWidth && line) {
-                    ctx.fillText(line, x, y);
-                    y += lineHeight;
-                    line = words[i];
-                } else {
-                    line = testLine;
-                }
-            }
-            if (line) ctx.fillText(line, x, y);
-        }
-
-        function drawTextItem(ctx, item, canvasW, canvasH, scaleX, scaleY, overrideText) {
-            const x = computeCoord(item.left, item.leftPercent, canvasW, scaleX);
-            const yTop = computeCoord(item.top, item.topPercent, canvasH, scaleY);
-
-            const fontSize = scaleValue(item.fontSize || 20, scaleY);
-            const fontWeight = item.fontWeight || "400";
-            const fontFamily = item.fontFamily || "sans-serif";
-
-            ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-            ctx.fillStyle = item.color || "#ffffff";
-
-            const text = (overrideText != null ? overrideText : (item.text || "")).toString();
-
-            const maxWidth = (typeof item.width === "number" && item.width > 0)
-                ? scaleValue(item.width, scaleX)
-                : null;
-
-            // stroke outline: dùng strokeText đơn giản
-            const sw = item.strokeWidth || 0;
-            const sc = item.strokeColor || "#000000";
-            const so = (item.strokeOpacity === undefined ? 0 : item.strokeOpacity);
-            if (sw > 0 && so > 0) {
-                ctx.strokeStyle = hexToRgba(sc, so);
-                ctx.lineWidth = sw * scaleY * 2;
-            } else {
-                ctx.lineWidth = 0;
-            }
-
-            const lineHeight = fontSize * 1.15;
-            let yBaseline = yTop + fontSize; // ước lượng
-
-            if (maxWidth) {
-                if (ctx.lineWidth > 0) {
-                    drawWrappedTextStroke(ctx, text, x, yBaseline, maxWidth, lineHeight);
-                }
-                drawWrappedText(ctx, text, x, yBaseline, maxWidth, lineHeight);
-            } else {
-                if (ctx.lineWidth > 0) {
-                    ctx.strokeText(text, x, yBaseline);
-                }
-                ctx.fillText(text, x, yBaseline);
-            }
-        }
-
-        function drawWrappedTextStroke(ctx, text, x, yTop, maxWidth, lineHeight) {
-            const words = text.split(/\s+/);
-            let line = "";
-            let y = yTop;
-            for (let i = 0; i < words.length; i++) {
-                const testLine = line ? (line + " " + words[i]) : words[i];
-                const metrics = ctx.measureText(testLine);
-                if (metrics.width > maxWidth && line) {
-                    ctx.strokeText(line, x, y);
-                    y += lineHeight;
-                    line = words[i];
-                } else {
-                    line = testLine;
-                }
-            }
-            if (line) ctx.strokeText(line, x, y);
-        }
-
-        function drawLineItem(ctx, item, canvasW, canvasH, scaleX, scaleY) {
-            const baseLength = (typeof item.lineLength === "number" ? item.lineLength :
-                (typeof item.width === "number" ? item.width : 200));
-            const baseThickness = (typeof item.lineThickness === "number" ? item.lineThickness :
-                (typeof item.height === "number" ? item.height : 4));
-
-            const length = scaleValue(baseLength, scaleX);
-            const thickness = scaleValue(baseThickness, scaleY);
-            const color = item.lineColor || "#e0b642";
-            const angleDeg = item.lineAngle || 0;
-            const angleRad = angleDeg * Math.PI / 180;
-
-            const x = computeCoord(item.left, item.leftPercent, canvasW, scaleX);
-            const y = computeCoord(item.top, item.topPercent, canvasH, scaleY);
-
-            const cx = x + length / 2;
-            const cy = y + thickness / 2;
-
-            ctx.save();
-            ctx.translate(cx, cy);
-            ctx.rotate(angleRad);
-            ctx.fillStyle = color;
-            ctx.fillRect(-length / 2, -thickness / 2, length, thickness);
-            ctx.restore();
-        }
-
-        function drawRectItem(ctx, item, canvasW, canvasH, scaleX, scaleY) {
-            const baseW = (typeof item.rectWidth === "number" ? item.rectWidth :
-                (typeof item.width === "number" ? item.width : 200));
-            const baseH = (typeof item.rectHeight === "number" ? item.rectHeight :
-                (typeof item.height === "number" ? item.height : 80));
-
-            const w = scaleValue(baseW, scaleX);
-            const h = scaleValue(baseH, scaleY);
-
-            const x = computeCoord(item.left, item.leftPercent, canvasW, scaleX);
-            const y = computeCoord(item.top, item.topPercent, canvasH, scaleY);
-
-            const color = item.rectFillColor || "rgba(0,0,0,0.3)";
-            const opacity = (item.rectOpacity === undefined ? 0.3 : item.rectOpacity);
-            const radius = scaleValue(item.rectRadius || 0, (scaleX + scaleY) / 2);
-
-            const fade =
-                item.rectGradient === "fade-ltr" ||
-                item.rectFade === true ||
-                item.rectFade === "true";
-
-            let gradient = null;
-            if (fade) {
-                gradient = ctx.createLinearGradient(x, y, x + w, y);
-                gradient.addColorStop(0, hexToRgba(color, opacity));
-                gradient.addColorStop(1, hexToRgba(color, 0));
-            }
-
-            ctx.save();
-            ctx.beginPath();
-            if (ctx.roundRect) {
-                ctx.roundRect(x, y, w, h, radius);
-            } else {
-                // fallback corner radius đơn giản
-                ctx.rect(x, y, w, h);
-            }
-            ctx.closePath();
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = gradient || hexToRgba(color, opacity);
-            ctx.fill();
-            ctx.restore();
-        }
-
-        function drawWatermark(ctx, canvasW, canvasH, userData) {
-            const layout = currentLayout || defaultLayout;
-            const baseW = layout.imageWidth || canvasW;
-            const baseH = layout.imageHeight || canvasH;
-            const scaleX = canvasW / baseW;
-            const scaleY = canvasH / baseH;
-
-            const { timeItem, dateItem, weekdayItem, addressItem, nameItem } = bindings || {};
-
-            (layout.items || []).forEach(item => {
-                const type = item.type || "text";
-                if (type === "text") {
-                    let override = null;
-                    if (item === timeItem && userData.timeText) override = userData.timeText;
-                    if (item === dateItem && userData.dateText) override = userData.dateText;
-                    if (item === weekdayItem && userData.weekdayText) override = userData.weekdayText;
-                    if (item === addressItem && userData.addressText) override = userData.addressText;
-                    if (item === nameItem && userData.nameText) override = userData.nameText;
-                    drawTextItem(ctx, item, canvasW, canvasH, scaleX, scaleY, override);
-                } else if (type === "line") {
-                    drawLineItem(ctx, item, canvasW, canvasH, scaleX, scaleY);
-                } else if (type === "rect") {
-                    drawRectItem(ctx, item, canvasW, canvasH, scaleX, scaleY);
-                }
-            });
-        }
-
-        // ====== camera ======
-        async function startCamera() {
-            try {
-                cameraStatus.textContent = "Đang mở camera...";
-                const constraints = {
-                    video: {
-                        facingMode: { ideal: "environment" }
-                    },
-                    audio: false
-                };
-                mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-                videoPreview.srcObject = mediaStream;
-                cameraStatus.textContent = "Camera đã sẵn sàng. Giữ máy dọc để chụp.";
-            } catch (err) {
-                console.error(err);
-                cameraStatus.textContent = "Không mở được camera. Có thể do trình duyệt/HTTPS/quyền máy ảnh.";
-                alert("Không mở được camera. Trên mobile cần https và cấp quyền camera.");
-            }
-        }
-
-        function stopCamera() {
-            if (mediaStream) {
-                mediaStream.getTracks().forEach(t => t.stop());
-                mediaStream = null;
-            }
-            videoPreview.srcObject = null;
-        }
-
-        // ====== flow ======
-        function goStepConfig() {
-            stepConfig.style.display = "block";
-            stepCamera.style.display = "none";
-            stepResult.style.display = "none";
-        }
-
-        function goStepCamera() {
-            stepConfig.style.display = "none";
-            stepCamera.style.display = "block";
-            stepResult.style.display = "none";
-        }
-
-        function goStepResult() {
-            stepConfig.style.display = "none";
-            stepCamera.style.display = "none";
-            stepResult.style.display = "block";
-        }
-
-        // ====== event handlers ======
-        updateDatePreview();
-        setInterval(updateDatePreview, 60_000); // cập nhật mỗi phút
-
-        // import JSON layout
-        layoutFileInput.addEventListener("change", (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = () => {
-                try {
-                    const json = JSON.parse(reader.result);
-                    if (!Array.isArray(json.items)) throw new Error("No items");
-                    currentLayout = json;
-                    bindings = analyzeBindings(currentLayout);
-                    layoutInfo.textContent =
-                        `JSON: OK\nimageWidth=${json.imageWidth}, imageHeight=${json.imageHeight}\nitems=${json.items.length}`;
-                } catch (err) {
-                    console.error(err);
-                    currentLayout = null;
-                    bindings = analyzeBindings(defaultLayout);
-                    layoutInfo.textContent = "JSON không hợp lệ, dùng layout mặc định.";
-                    alert("File JSON không hợp lệ. Sẽ dùng layout mặc định.");
-                }
-            };
-            reader.readAsText(file, "utf-8");
-        });
-
-        // startCameraBtn
-        startCameraBtn.addEventListener("click", async () => {
-            const timeVal = timeInput.value.trim();
-            const nameVal = nameInput.value.trim();
-            const addrVal = addressInput.value.trim();
-
-            if (!timeVal) {
-                alert("Nhập giờ (HH:MM) trước khi chụp.");
-                return;
-            }
-            if (!nameVal) {
-                alert("Nhập họ tên.");
-                return;
-            }
-            if (!addrVal) {
-                alert("Nhập địa chỉ.");
-                return;
-            }
-
-            // nếu chưa có layout, dùng default
-            if (!currentLayout) {
-                currentLayout = defaultLayout;
-            }
-            if (!bindings) {
-                bindings = analyzeBindings(currentLayout);
-            }
-
-            const { dateStr, weekday } = getNowVietnam();
-            configStatus.textContent =
-                `Sẽ dùng:\nGiờ: ${timeVal}\nNgày: ${dateStr}\nThứ: ${weekday}`;
-
-            goStepCamera();
-            await startCamera();
-        });
-
-        backBtn.addEventListener("click", () => {
-            stopCamera();
-            goStepConfig();
-        });
-
-        captureBtn.addEventListener("click", () => {
-            if (!mediaStream) {
-                alert("Camera chưa sẵn sàng.");
-                return;
-            }
-            const video = videoPreview;
-            const canvas = captureCanvas;
-            const ctx = canvas.getContext("2d");
-
-            const cw = canvas.width;  // 960
-            const ch = canvas.height; // 1280
-
-            const vw = video.videoWidth;
-            const vh = video.videoHeight;
-            if (!vw || !vh) {
-                alert("Camera đang khởi động, thử lại sau 1–2s.");
-                return;
-            }
-
-            // cover: fill canvas (960x1280) bằng frame camera, crop ở giữa
-            const scale = Math.max(cw / vw, ch / vh);
-            const drawW = vw * scale;
-            const drawH = vh * scale;
-            const dx = (cw - drawW) / 2;
-            const dy = (ch - drawH) / 2;
-
-            ctx.clearRect(0, 0, cw, ch);
-            ctx.drawImage(video, dx, dy, drawW, drawH);
-
-            const { dateStr, weekday } = getNowVietnam();
-            const timeVal = timeInput.value.trim();
-            const nameVal = nameInput.value.trim();
-            const addrVal = addressInput.value.trim();
-
-            const userData = {
-                timeText: timeVal,
-                dateText: dateStr,
-                weekdayText: weekday,
-                nameText: `Họ tên: ${nameVal}`,
-                addressText: addrVal
-            };
-
-            drawWatermark(ctx, cw, ch, userData);
-
-            const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-            resultImage.src = dataUrl;
-
-            stopCamera();
-            goStepResult();
-        });
-
-        retakeBtn.addEventListener("click", async () => {
-            goStepCamera();
-            await startCamera();
-        });
-
-        downloadBtn.addEventListener("click", () => {
-            const dataUrl = resultImage.src;
-            if (!dataUrl) {
-                alert("Chưa có ảnh để tải.");
-                return;
-            }
-            const a = document.createElement("a");
-            a.href = dataUrl;
-            a.download = `chattime_${Date.now()}.jpg`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        });
-
-        // init
-        bindings = analyzeBindings(defaultLayout);
-    </script>
+      };
+      reader.readAsText(file, "utf-8");
+    });
+
+    startCameraBtn.addEventListener("click", async () => {
+      const timeVal = timeInput.value.trim();
+      const nameVal = nameInput.value.trim();
+      const addrVal = addressInput.value.trim();
+
+      if (!timeVal) {
+        alert("Nhập giờ (HH:MM) trước khi chụp.");
+        return;
+      }
+      if (!nameVal) {
+        alert("Nhập họ tên.");
+        return;
+      }
+      if (!addrVal) {
+        alert("Nhập địa chỉ.");
+        return;
+      }
+
+      if (!currentLayout) {
+        currentLayout = defaultLayout;
+      }
+      if (!bindings) {
+        bindings = analyzeBindings(currentLayout);
+      }
+
+      const { dateStr, weekday } = getNowVietnam();
+      configStatus.textContent =
+        `Sẽ dùng:\nGiờ: ${timeVal}\nNgày: ${dateStr}\nThứ: ${weekday}`;
+
+      goStepCamera();
+      await startCamera();
+    });
+
+    backBtn.addEventListener("click", () => {
+      stopCamera();
+      goStepConfig();
+    });
+
+    captureBtn.addEventListener("click", () => {
+      if (!mediaStream) {
+        alert("Camera chưa sẵn sàng.");
+        return;
+      }
+      const video = videoPreview;
+      const canvas = captureCanvas;
+      const ctx = canvas.getContext("2d");
+
+      const cw = canvas.width;
+      const ch = canvas.height;
+
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      if (!vw || !vh) {
+        alert("Camera đang khởi động, thử lại sau 1–2s.");
+        return;
+      }
+
+      const scale = Math.max(cw / vw, ch / vh);
+      const drawW = vw * scale;
+      const drawH = vh * scale;
+      const dx = (cw - drawW) / 2;
+      const dy = (ch - drawH) / 2;
+
+      ctx.clearRect(0, 0, cw, ch);
+      ctx.drawImage(video, dx, dy, drawW, drawH);
+
+      const { dateStr, weekday } = getNowVietnam();
+      const timeVal = timeInput.value.trim();
+      const nameVal = nameInput.value.trim();
+      const addrVal = addressInput.value.trim();
+
+      const userData = {
+        timeText: timeVal,
+        dateText: dateStr,
+        weekdayText: weekday,
+        nameText: `Họ tên: ${nameVal}`,
+        addressText: addrVal
+      };
+
+      drawWatermark(ctx, cw, ch, userData);
+
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+      resultImage.src = dataUrl;
+
+      stopCamera();
+      goStepResult();
+    });
+
+    retakeBtn.addEventListener("click", async () => {
+      goStepCamera();
+      await startCamera();
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      const dataUrl = resultImage.src;
+      if (!dataUrl) {
+        alert("Chưa có ảnh để tải.");
+        return;
+      }
+
+      // anchor + download, đồng thời mở tab mới cho mobile
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `chattime_${Date.now()}.jpg`;
+      a.target = "_blank";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      // fallback thêm (một số trình duyệt vẫn không load anchor)
+      try {
+        window.open(dataUrl, "_blank");
+      } catch (e) {
+        console.log("window.open fallback error:", e);
+      }
+    });
+
+    bindings = analyzeBindings(defaultLayout);
+  </script>
 </body>
-
 </html>
