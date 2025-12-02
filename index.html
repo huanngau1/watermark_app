@@ -120,8 +120,7 @@
       cursor: default;
     }
 
-    #step-camera,
-    #step-result {
+    #step-camera {
       display: none;
     }
 
@@ -142,17 +141,10 @@
       box-shadow: 0 0 0 1px #222;
     }
 
-    #videoPreview {
+    #previewCanvas {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      background: #000;
-    }
-
-    #resultImage {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+      display: block;
       background: #000;
     }
 
@@ -182,13 +174,30 @@
     .actions button {
       flex: 1;
     }
+
+    #lastShot {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #aaa;
+    }
+
+    #lastShot img {
+      width: 100%;
+      border-radius: 6px;
+      margin-top: 4px;
+      background: #000;
+    }
+
+    video#videoSource {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="app">
     <h1>Chattime Capture</h1>
 
-    <!-- STEP 1: cấu hình thông tin + JSON -->
+    <!-- STEP 1: cấu hình watermark -->
     <section id="step-config" class="card">
       <h2>Bước 1: Thông tin watermark</h2>
 
@@ -203,79 +212,60 @@
         </div>
       </div>
 
-      <div class="control-group" style="margin-top:8px;">
+      <div style="margin-top:8px;">
         <label for="nameInput">Họ tên</label>
         <input id="nameInput" type="text" placeholder="Họ tên người dùng">
       </div>
 
-      <div class="control-group" style="margin-top:8px;">
+      <div style="margin-top:8px;">
         <label for="addressInput">Địa chỉ</label>
-        <input id="addressInput" type="text" placeholder="Địa chỉ chụp (số nhà, đường, phường...)">
+        <input id="addressInput" type="text" placeholder="Địa chỉ chụp">
       </div>
 
-      <div class="control-group" style="margin-top:8px;">
+      <div style="margin-top:8px;">
         <label for="layoutFile">Layout JSON (tùy chọn)</label>
         <input id="layoutFile" type="file" accept="application/json">
         <div class="hint">
           Nếu không chọn, sẽ dùng layout mặc định (960×1280).<br>
-          JSON xuất từ overlay-tool: giữ nguyên id/text để tool tự map.
+          Dùng JSON export từ overlay-tool.
         </div>
         <div id="layoutInfo" class="status"></div>
       </div>
 
-      <div class="control-group" style="margin-top:8px;">
+      <div style="margin-top:8px;">
         <button id="startCameraBtn">Xác nhận & mở camera</button>
         <div id="configStatus" class="status"></div>
       </div>
     </section>
 
-    <!-- STEP 2: camera -->
+    <!-- STEP 2: camera + preview canvas -->
     <section id="step-camera" class="card">
-      <h2>Bước 2: Chụp ảnh <span class="badge">960×1280 output</span></h2>
+      <h2>Bước 2: Camera & watermark <span class="badge">960×1280</span></h2>
 
       <div class="frame-wrapper">
         <div class="frame">
-          <video id="videoPreview" autoplay playsinline muted></video>
+          <canvas id="previewCanvas" width="960" height="1280"></canvas>
         </div>
       </div>
 
       <div class="actions">
-        <button id="captureBtn">Chụp</button>
+        <button id="captureBtn">Chụp & tải ảnh</button>
         <button id="backBtn" class="secondary">Quay lại</button>
       </div>
 
       <div id="cameraStatus" class="status"></div>
+
+      <div id="lastShot"></div>
     </section>
 
-    <!-- STEP 3: kết quả -->
-    <section id="step-result" class="card">
-      <h2>Bước 3: Kết quả</h2>
-
-      <div class="frame-wrapper">
-        <div class="frame">
-          <img id="resultImage" alt="Kết quả" />
-        </div>
-      </div>
-
-      <div class="actions">
-        <button id="downloadBtn">Tải ảnh về</button>
-        <button id="retakeBtn" class="secondary">Chụp lại</button>
-      </div>
-
-      <div class="hint" style="margin-top:6px;">
-        Nếu nút tải không hoạt động trên điện thoại, chạm & giữ vào ảnh để lưu.
-      </div>
-    </section>
-
-    <!-- canvas ẩn để render -->
-    <canvas id="captureCanvas" width="960" height="1280" style="display:none;"></canvas>
+    <!-- video nguồn (ẩn) -->
+    <video id="videoSource" autoplay playsinline muted></video>
   </div>
 
   <script>
-    // ====== DOM refs ======
+    // ===== DOM refs =====
     const stepConfig = document.getElementById("step-config");
     const stepCamera = document.getElementById("step-camera");
-    const stepResult = document.getElementById("step-result");
 
     const timeInput = document.getElementById("timeInput");
     const nameInput = document.getElementById("nameInput");
@@ -291,25 +281,29 @@
     const captureBtn = document.getElementById("captureBtn");
     const cameraStatus = document.getElementById("cameraStatus");
 
-    const resultImage = document.getElementById("resultImage");
-    const downloadBtn = document.getElementById("downloadBtn");
-    const retakeBtn = document.getElementById("retakeBtn");
+    const previewCanvas = document.getElementById("previewCanvas");
+    const ctx = previewCanvas.getContext("2d");
 
-    const videoPreview = document.getElementById("videoPreview");
-    const captureCanvas = document.getElementById("captureCanvas");
+    const videoSource = document.getElementById("videoSource");
+    const lastShotContainer = document.getElementById("lastShot");
 
-    // ====== state ======
+    // ===== state =====
     let currentLayout = null;
-    let bindings = null;  // map time/date/weekday/address/name
+    let bindings = null;  // map các item text
     let mediaStream = null;
+    let previewLoopId = null;
+    let currentUserData = null;
 
-    // ====== default layout (base 960x1280) ======
+    const CANVAS_W = 960;
+    const CANVAS_H = 1280;
+
+    // ===== default layout 960x1280 (giống JSON bạn gửi) =====
     const defaultLayout = {
       imageWidth: 960,
       imageHeight: 1280,
       items: [
         {
-          id: "time",  // 19:35
+          id: "time",
           type: "text",
           left: -6,
           top: 967,
@@ -341,7 +335,7 @@
           lineAngle: 90
         },
         {
-          id: "date", // 17 Tháng 11, 2025
+          id: "date",
           type: "text",
           left: 209,
           top: 976,
@@ -486,11 +480,7 @@
       ]
     };
 
-    // ====== util: date/time ======
-    function pad2(n) {
-      return n < 10 ? "0" + n : "" + n;
-    }
-
+    // ===== date/time helpers =====
     function getNowVietnam() {
       const now = new Date();
       const fmtDate = new Intl.DateTimeFormat("vi-VN", {
@@ -527,12 +517,11 @@
       datePreview.textContent = `${dateStr}\n${weekday}`;
     }
 
-    // ====== hex/rgba helper ======
+    // ===== color helper =====
     function hexToRgba(input, alpha) {
-      let hex = (input || "").trim();
-      if (!hex) return input || "";
-
-      const rgbaMatch = hex.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/i);
+      let color = (input || "").trim();
+      if (!color) return input || "";
+      const rgbaMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/i);
       if (rgbaMatch) {
         const r = parseInt(rgbaMatch[1], 10);
         const g = parseInt(rgbaMatch[2], 10);
@@ -542,22 +531,21 @@
           : (rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1);
         return `rgba(${r}, ${g}, ${b}, ${a})`;
       }
-
-      if (hex[0] === "#") hex = hex.slice(1);
-      if (hex.length === 3) {
-        hex = hex.split("").map(c => c + c).join("");
+      if (color[0] === "#") color = color.slice(1);
+      if (color.length === 3) {
+        color = color.split("").map(c => c + c).join("");
       }
-      if (hex.length === 6) {
-        const r = parseInt(hex.slice(0, 2), 16);
-        const g = parseInt(hex.slice(2, 4), 16);
-        const b = parseInt(hex.slice(4, 6), 16);
+      if (color.length === 6) {
+        const r = parseInt(color.slice(0, 2), 16);
+        const g = parseInt(color.slice(2, 4), 16);
+        const b = parseInt(color.slice(4, 6), 16);
         const a = (typeof alpha === "number") ? alpha : 1;
         return `rgba(${r}, ${g}, ${b}, ${a})`;
       }
       return input;
     }
 
-    // ====== layout helper ======
+    // ===== layout helpers =====
     function computeCoord(px, percent, total, scale) {
       if (typeof percent === "number") return percent * total;
       if (typeof px === "number") return px * scale;
@@ -611,15 +599,16 @@
       return { timeItem, dateItem, weekdayItem, addressItem, nameItem };
     }
 
-    // ====== DRAW TEXT (canvas) ======
-    function drawWrappedText(ctx, text, x, firstBaselineY, maxWidth, lineHeight) {
+    // ===== draw text (top-based, wrap theo width) =====
+    function drawWrappedText(ctx, text, x, yTop, maxWidth, lineHeight, doStroke) {
       const words = text.split(/\s+/);
       let line = "";
-      let y = firstBaselineY;
+      let y = yTop;
       for (let i = 0; i < words.length; i++) {
         const testLine = line ? (line + " " + words[i]) : words[i];
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && line) {
+        const w = ctx.measureText(testLine).width;
+        if (w > maxWidth && line) {
+          if (doStroke) ctx.strokeText(line, x, y);
           ctx.fillText(line, x, y);
           y += lineHeight;
           line = words[i];
@@ -627,25 +616,10 @@
           line = testLine;
         }
       }
-      if (line) ctx.fillText(line, x, y);
-    }
-
-    function drawWrappedTextStroke(ctx, text, x, firstBaselineY, maxWidth, lineHeight) {
-      const words = text.split(/\s+/);
-      let line = "";
-      let y = firstBaselineY;
-      for (let i = 0; i < words.length; i++) {
-        const testLine = line ? (line + " " + words[i]) : words[i];
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && line) {
-          ctx.strokeText(line, x, y);
-          y += lineHeight;
-          line = words[i];
-        } else {
-          line = testLine;
-        }
+      if (line) {
+        if (doStroke) ctx.strokeText(line, x, y);
+        ctx.fillText(line, x, y);
       }
-      if (line) ctx.strokeText(line, x, y);
     }
 
     function drawTextItem(ctx, item, canvasW, canvasH, scaleX, scaleY, overrideText) {
@@ -657,6 +631,7 @@
       const fontFamily = item.fontFamily || "sans-serif";
 
       ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+      ctx.textBaseline = "top"; // bám top = yTop
       ctx.fillStyle = item.color || "#ffffff";
 
       const text = (overrideText != null ? overrideText : (item.text || "")).toString();
@@ -668,30 +643,21 @@
       const sw = item.strokeWidth || 0;
       const sc = item.strokeColor || "#000000";
       const so = (item.strokeOpacity === undefined ? 0 : item.strokeOpacity);
-      if (sw > 0 && so > 0) {
+      const doStroke = sw > 0 && so > 0;
+      if (doStroke) {
         ctx.strokeStyle = hexToRgba(sc, so);
         ctx.lineWidth = sw * scaleY * 2;
       } else {
         ctx.lineWidth = 0;
       }
 
-      // dùng TextMetrics để canh top ~ yTop
-      const testLine = text.split(/\n/)[0] || text;
-      const metrics = ctx.measureText(testLine);
-      const ascent = metrics.actualBoundingBoxAscent || fontSize * 0.8;
       const lineHeight = fontSize * 1.15;
-      const firstBaselineY = yTop + ascent;
 
       if (maxWidth) {
-        if (ctx.lineWidth > 0) {
-          drawWrappedTextStroke(ctx, text, x, firstBaselineY, maxWidth, lineHeight);
-        }
-        drawWrappedText(ctx, text, x, firstBaselineY, maxWidth, lineHeight);
+        drawWrappedText(ctx, text, x, yTop, maxWidth, lineHeight, doStroke);
       } else {
-        if (ctx.lineWidth > 0) {
-          ctx.strokeText(text, x, firstBaselineY);
-        }
-        ctx.fillText(text, x, firstBaselineY);
+        if (doStroke) ctx.strokeText(text, x, yTop);
+        ctx.fillText(text, x, yTop);
       }
     }
 
@@ -742,13 +708,6 @@
         item.rectFade === true ||
         item.rectFade === "true";
 
-      let gradient = null;
-      if (fade) {
-        gradient = ctx.createLinearGradient(x, y, x + w, y);
-        gradient.addColorStop(0, hexToRgba(color, opacity));
-        gradient.addColorStop(1, hexToRgba(color, 0));
-      }
-
       ctx.save();
       ctx.beginPath();
       if (ctx.roundRect) {
@@ -756,9 +715,18 @@
       } else {
         ctx.rect(x, y, w, h);
       }
-      ctx.closePath();
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = gradient || hexToRgba(color, opacity);
+
+      let fillStyle;
+      if (fade) {
+        const grad = ctx.createLinearGradient(x, y, x + w, y);
+        grad.addColorStop(0, hexToRgba(color, opacity));
+        grad.addColorStop(1, hexToRgba(color, 0));
+        fillStyle = grad;
+      } else {
+        fillStyle = hexToRgba(color, opacity);
+      }
+
+      ctx.fillStyle = fillStyle;
       ctx.fill();
       ctx.restore();
     }
@@ -790,54 +758,86 @@
       });
     }
 
-    // ====== camera ======
+    // ===== camera =====
     async function startCamera() {
       try {
         cameraStatus.textContent = "Đang mở camera...";
         const constraints = {
           video: {
-            facingMode: { ideal: "environment" }
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 2560 },
+            aspectRatio: { ideal: 3/4 }
           },
           audio: false
         };
         mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-        videoPreview.srcObject = mediaStream;
+        videoSource.srcObject = mediaStream;
+        await videoSource.play().catch(() => {});
         cameraStatus.textContent = "Camera đã sẵn sàng. Giữ máy dọc để chụp.";
+        startPreviewLoop();
       } catch (err) {
         console.error(err);
-        cameraStatus.textContent = "Không mở được camera. Có thể do trình duyệt/HTTPS/quyền máy ảnh.";
+        cameraStatus.textContent = "Không mở được camera. Cần https + quyền camera.";
         alert("Không mở được camera. Trên mobile cần https và cấp quyền camera.");
       }
     }
 
     function stopCamera() {
+      if (previewLoopId != null) {
+        cancelAnimationFrame(previewLoopId);
+        previewLoopId = null;
+      }
       if (mediaStream) {
         mediaStream.getTracks().forEach(t => t.stop());
         mediaStream = null;
       }
-      videoPreview.srcObject = null;
+      videoSource.srcObject = null;
     }
 
-    // ====== flow ======
+    function startPreviewLoop() {
+      if (previewLoopId != null) return;
+      const draw = () => {
+        previewLoopId = requestAnimationFrame(draw);
+        const cw = CANVAS_W;
+        const ch = CANVAS_H;
+
+        ctx.clearRect(0, 0, cw, ch);
+
+        const vw = videoSource.videoWidth || 0;
+        const vh = videoSource.videoHeight || 0;
+
+        if (vw > 0 && vh > 0) {
+          const scale = Math.max(cw / vw, ch / vh);
+          const drawW = vw * scale;
+          const drawH = vh * scale;
+          const dx = (cw - drawW) / 2;
+          const dy = (ch - drawH) / 2;
+          ctx.drawImage(videoSource, dx, dy, drawW, drawH);
+        } else {
+          ctx.fillStyle = "#000";
+          ctx.fillRect(0, 0, cw, ch);
+        }
+
+        if (currentUserData) {
+          drawWatermark(ctx, cw, ch, currentUserData);
+        }
+      };
+      draw();
+    }
+
+    // ===== flow =====
     function goStepConfig() {
       stepConfig.style.display = "block";
       stepCamera.style.display = "none";
-      stepResult.style.display = "none";
     }
 
     function goStepCamera() {
       stepConfig.style.display = "none";
       stepCamera.style.display = "block";
-      stepResult.style.display = "none";
     }
 
-    function goStepResult() {
-      stepConfig.style.display = "none";
-      stepCamera.style.display = "none";
-      stepResult.style.display = "block";
-    }
-
-    // ====== event handlers ======
+    // ===== events =====
     updateDatePreview();
     setInterval(updateDatePreview, 60_000);
 
@@ -882,16 +882,20 @@
         return;
       }
 
-      if (!currentLayout) {
-        currentLayout = defaultLayout;
-      }
-      if (!bindings) {
-        bindings = analyzeBindings(currentLayout);
-      }
+      if (!currentLayout) currentLayout = defaultLayout;
+      if (!bindings) bindings = analyzeBindings(currentLayout);
 
       const { dateStr, weekday } = getNowVietnam();
       configStatus.textContent =
         `Sẽ dùng:\nGiờ: ${timeVal}\nNgày: ${dateStr}\nThứ: ${weekday}`;
+
+      currentUserData = {
+        timeText: timeVal,
+        dateText: dateStr,
+        weekdayText: weekday,
+        nameText: `Họ tên: ${nameVal}`,
+        addressText: addrVal
+      };
 
       goStepCamera();
       await startCamera();
@@ -903,68 +907,18 @@
     });
 
     captureBtn.addEventListener("click", () => {
-      if (!mediaStream) {
-        alert("Camera chưa sẵn sàng.");
+      if (!currentUserData) {
+        alert("Chưa có dữ liệu watermark.");
         return;
       }
-      const video = videoPreview;
-      const canvas = captureCanvas;
-      const ctx = canvas.getContext("2d");
+      const dataUrl = previewCanvas.toDataURL("image/jpeg", 0.95);
 
-      const cw = canvas.width;
-      const ch = canvas.height;
+      // hiển thị preview nhỏ
+      lastShotContainer.innerHTML =
+        `<div>Ảnh đã chụp (chạm & giữ để lưu nếu nút tải không chạy):</div>
+         <img src="${dataUrl}" alt="Last shot" />`;
 
-      const vw = video.videoWidth;
-      const vh = video.videoHeight;
-      if (!vw || !vh) {
-        alert("Camera đang khởi động, thử lại sau 1–2s.");
-        return;
-      }
-
-      const scale = Math.max(cw / vw, ch / vh);
-      const drawW = vw * scale;
-      const drawH = vh * scale;
-      const dx = (cw - drawW) / 2;
-      const dy = (ch - drawH) / 2;
-
-      ctx.clearRect(0, 0, cw, ch);
-      ctx.drawImage(video, dx, dy, drawW, drawH);
-
-      const { dateStr, weekday } = getNowVietnam();
-      const timeVal = timeInput.value.trim();
-      const nameVal = nameInput.value.trim();
-      const addrVal = addressInput.value.trim();
-
-      const userData = {
-        timeText: timeVal,
-        dateText: dateStr,
-        weekdayText: weekday,
-        nameText: `Họ tên: ${nameVal}`,
-        addressText: addrVal
-      };
-
-      drawWatermark(ctx, cw, ch, userData);
-
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-      resultImage.src = dataUrl;
-
-      stopCamera();
-      goStepResult();
-    });
-
-    retakeBtn.addEventListener("click", async () => {
-      goStepCamera();
-      await startCamera();
-    });
-
-    downloadBtn.addEventListener("click", () => {
-      const dataUrl = resultImage.src;
-      if (!dataUrl) {
-        alert("Chưa có ảnh để tải.");
-        return;
-      }
-
-      // anchor + download, đồng thời mở tab mới cho mobile
+      // tải về / mở tab mới
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = `chattime_${Date.now()}.jpg`;
@@ -973,7 +927,6 @@
       a.click();
       document.body.removeChild(a);
 
-      // fallback thêm (một số trình duyệt vẫn không load anchor)
       try {
         window.open(dataUrl, "_blank");
       } catch (e) {
@@ -981,6 +934,7 @@
       }
     });
 
+    // init binding default
     bindings = analyzeBindings(defaultLayout);
   </script>
 </body>
